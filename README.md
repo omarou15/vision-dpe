@@ -12,10 +12,39 @@ Application mobile de Diagnostic de Performance Énergétique (DPE) certifiée p
 | Phase | Description | Status | Avancement |
 |-------|-------------|--------|------------|
 | 🔧 0.1 | Setup projet Expo + React Native | ✅ Fait | 100% |
-| 🔧 0.2 | Générer types TypeScript depuis XSD | ⏳ À faire | 0% |
+| 🔧 0.2 | Générer types TypeScript depuis XSD | ✅ Fait | 100% |
 | 🔧 0.3 | Schema Supabase + migrations | ⏳ À faire | 0% |
 | 🔧 0.4 | Setup CI/CD GitHub Actions + EAS | ✅ Fait | 100% |
 | 🔧 0.5 | Maquettes Figma complètes | ⏳ À faire | 0% |
+
+**Phase 0 globale: 60%** ✅
+
+## 📦 Types Générés
+
+```typescript
+/src/types/
+├── dpe.ts              # Types principaux DPE (enums, interfaces)
+├── tables-valeurs.ts   # Tables ADEME (coefficients U, facteurs)
+├── validation.ts       # Règles de validation
+├── api-ademe.ts        # Types API ADEME
+└── index.ts            # Export centralisé
+```
+
+### Enums disponibles
+- `EnumTypeBatiment` - Maison / Appartement
+- `EnumPeriodeConstruction` - Périodes de construction
+- `EnumTypeParoi` - Types de parois
+- `EnumTypeVitrage` - Simple / Double / Triple vitrage
+- `EnumTypeVmc` - Types de ventilation
+- `EnumTypeGenerateurChauffage` - Chaudières, PAC, poêles...
+- `EnumEtiquetteDpe` - A à G
+
+### Interfaces principales
+- `DPEDocument` - Document DPE complet
+- `CaracteristiquesGenerales` - Type, surface, période
+- `Enveloppe` - Murs, baies, planchers, PT
+- `Installations` - Chauffage, ECS, ventilation
+- `Resultats` - Consommations, émissions, étiquettes
 
 ## 📱 Stack Technique
 
@@ -51,7 +80,7 @@ npm start
 ├── /components    # Composants React Native
 ├── /screens       # Écrans
 ├── /navigation    # Navigation
-├── /types         # Types TypeScript
+├── /types         # Types TypeScript ✅
 ├── /services      # Services métier
 ├── /utils         # Utilitaires
 └── /store         # State management
@@ -68,7 +97,7 @@ npm start
 
 | Phase | Description | Semaines | Status |
 |-------|-------------|----------|--------|
-| 🔧 Phase 0 | Fondations | 2 | 🚧 En cours (40%) |
+| 🔧 Phase 0 | Fondations | 2 | 🚧 En cours (60%) |
 | 📋 Phase 1 | Administratif | 1 | ⏳ À faire |
 | 🏠 Phase 2 | Enveloppe | 3 | ⏳ À faire |
 | ⚡ Phase 3 | Installations | 3 | ⏳ À faire |
