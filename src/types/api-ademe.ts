@@ -20,14 +20,18 @@ export const ADEME_ENDPOINTS = {
 // REQUÊTES
 // ============================================================================
 
+// Type générique pour les données DPE envoyées à l'API
+// Utilise unknown pour la sécurité - le type exact dépend du contexte
+export type DPEDonneesAPI = Record<string, unknown>;
+
 export interface ControleCoherenceRequest {
-  dpe_data: Record<string, any>;
+  dpe_data: DPEDonneesAPI;
   version: "2.6";
   type_dpe: "existant" | "neuf" | "tertiaire";
 }
 
 export interface TraductionXMLRequest {
-  dpe_data: Record<string, any>;
+  dpe_data: DPEDonneesAPI;
   version: "2.6";
   format: "standard" | "complet";
 }

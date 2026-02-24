@@ -5,12 +5,18 @@
     "plugin:react-hooks/recommended"
   ],
   "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
   "plugins": ["@typescript-eslint"],
   "root": true,
   "rules": {
     "@typescript-eslint/no-unused-vars": "error",
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/no-explicit-any": "warn"
+    "@typescript-eslint/no-explicit-any": "error",
+    "no-console": ["warn", { "allow": ["error", "warn"] }]
   },
-  "ignorePatterns": ["node_modules/", "dist/", ".expo/"]
+  "ignorePatterns": ["node_modules/", "dist/", ".expo/", "scripts/", "**/*.test.ts", "**/__tests__/**"]
 }

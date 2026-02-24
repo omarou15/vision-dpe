@@ -44,3 +44,4 @@ export {
 export * from "./tables-valeurs";
 export * from "./validation";
 export * from "./api-ademe";
+export * from "./services";
