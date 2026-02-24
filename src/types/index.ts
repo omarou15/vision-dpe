@@ -66,3 +66,4 @@ export {
 
 export * from "./api-ademe";
 export * from "./services";
+export * from "./utils";

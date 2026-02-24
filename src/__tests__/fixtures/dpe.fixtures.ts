@@ -322,3 +322,189 @@ export const mockStep2InvalidData = {
     nombre_niveaux: 100,
   },
 };
+
+/**
+ * Crée un DPE complet pour les tests
+ */
+export function createMockDPE(overrides: Partial<DPEDocument> = {}): DPEDocument {
+  return {
+    ...mockDPEDocument,
+    ...overrides,
+    administratif: {
+      ...mockDPEDocument.administratif,
+      ...overrides.administratif,
+    },
+    logement: {
+      ...mockDPEDocument.logement,
+      ...overrides.logement,
+      caracteristique_generale: {
+        ...mockDPEDocument.logement.caracteristique_generale,
+        ...overrides.logement?.caracteristique_generale,
+      },
+      meteo: {
+        ...mockDPEDocument.logement.meteo,
+        ...overrides.logement?.meteo,
+      },
+      enveloppe: {
+        ...mockDPEDocument.logement.enveloppe,
+        ...overrides.logement?.enveloppe,
+      },
+    },
+  };
+}
+
+/**
+ * Crée un DPE minimal pour les tests rapides
+ */
+export function createMinimalMockDPE(): Partial<DPEDocument> {
+  return {
+    version: "8.0.4",
+    administratif: {
+      date_visite_diagnostiqueur: "2024-01-15",
+      date_etablissement_dpe: "2024-01-16",
+      nom_proprietaire: "Test",
+      enum_modele_dpe_id: EnumModeleDpe.LOGEMENT_EXISTANT,
+      enum_version_id: EnumVersionDpe.V2_6,
+      diagnostiqueur: {
+        usr_logiciel_id: 1,
+        version_logiciel: "1.0.0",
+        nom_diagnostiqueur: "Test",
+        prenom_diagnostiqueur: "Test",
+        mail_diagnostiqueur: "test@test.com",
+        telephone_diagnostiqueur: "0123456789",
+        adresse_diagnostiqueur: "Test",
+        entreprise_diagnostiqueur: "Test",
+        numero_certification_diagnostiqueur: "CERT-001",
+        organisme_certificateur: "Test",
+      },
+      geolocalisation: {
+        adresses: {
+          adresse_proprietaire: {
+            adresse_brut: "Test",
+            code_postal_brut: "75000",
+            nom_commune_brut: "Paris",
+            label_brut: "Test",
+            label_brut_avec_complement: "Test",
+            enum_statut_geocodage_ban_id: 1,
+            ban_date_appel: "2024-01-15",
+            ban_id: "test",
+            ban_label: "Test",
+            ban_housenumber: "1",
+            ban_street: "Test",
+            ban_citycode: "75000",
+            ban_postcode: "75000",
+            ban_city: "Paris",
+            ban_type: "housenumber",
+            ban_score: 0.9,
+            ban_x: 2.35,
+            ban_y: 48.85,
+          },
+          adresse_bien: {
+            adresse_brut: "Test",
+            code_postal_brut: "75000",
+            nom_commune_brut: "Paris",
+            label_brut: "Test",
+            label_brut_avec_complement: "Test",
+            enum_statut_geocodage_ban_id: 1,
+            ban_date_appel: "2024-01-15",
+            ban_id: "test",
+            ban_label: "Test",
+            ban_housenumber: "1",
+            ban_street: "Test",
+            ban_citycode: "75000",
+            ban_postcode: "75000",
+            ban_city: "Paris",
+            ban_type: "housenumber",
+            ban_score: 0.9,
+            ban_x: 2.35,
+            ban_y: 48.85,
+          },
+        },
+      },
+    },
+    logement: {
+      caracteristique_generale: {
+        annee_construction: 2000,
+        enum_periode_construction_id: EnumPeriodeConstruction.PERIODE_1989_2000,
+        enum_methode_application_dpe_log_id: 1,
+        surface_habitable_logement: 100,
+        nombre_niveau_immeuble: 1,
+        nombre_niveau_logement: 1,
+        hsp: 2.5,
+      },
+      meteo: {
+        enum_zone_climatique_id: EnumZoneClimatique.H1B,
+        enum_classe_altitude_id: EnumClasseAltitude.INF_400M,
+        batiment_materiaux_anciens: 0,
+      },
+      enveloppe: {
+        inertie: {
+          inertie_plancher_bas_lourd: 1,
+          inertie_plancher_haut_lourd: 0,
+          inertie_paroi_verticale_lourd: 1,
+          enum_classe_inertie_id: 2,
+        },
+        mur_collection: {
+          mur: [
+            {
+              donnee_entree: {
+                reference: "MUR-001",
+                enum_type_adjacence_id: EnumTypeAdjacence.EXTERIEUR,
+                enum_orientation_id: EnumOrientation.NORD,
+                surface_paroi_opaque: 50,
+                paroi_lourde: 1,
+                enum_type_isolation_id: 1,
+                enum_methode_saisie_u_id: 1,
+                enduit_isolant_paroi_ancienne: 0,
+              },
+              donnee_intermediaire: {
+                b: 1,
+                umur: 0.5,
+              },
+            },
+          ],
+        },
+        baie_vitree_collection: {
+          baie_vitree: [],
+        },
+        plancher_bas_collection: {
+          plancher_bas: [
+            {
+              donnee_entree: {
+                reference: "PB-001",
+                enum_type_adjacence_id: EnumTypeAdjacence.VIDE_SANITAIRE,
+                surface_paroi_opaque: 100,
+                paroi_lourde: 1,
+                enum_type_isolation_id: 1,
+                enum_methode_saisie_u_id: 1,
+              },
+              donnee_intermediaire: {
+                b: 0.85,
+                upb: 0.4,
+                upb_final: 0.34,
+              },
+            },
+          ],
+        },
+        plancher_haut_collection: {
+          plancher_haut: [
+            {
+              donnee_entree: {
+                reference: "PH-001",
+                enum_type_adjacence_id: EnumTypeAdjacence.COMBLE_FAIBLEMENT_VENTILE,
+                surface_paroi_opaque: 100,
+                paroi_lourde: 0,
+                enum_type_isolation_id: 2,
+                enum_methode_saisie_u_id: 1,
+              },
+              donnee_intermediaire: {
+                b: 0.95,
+                uph: 0.3,
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
+}
