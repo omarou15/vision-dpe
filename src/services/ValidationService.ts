@@ -1,511 +1,614 @@
 /**
  * ValidationService - Service de validation des données DPE
- * Valide les données selon les règles métier et réglementaires 3CL
+ * Phase 1 - Module Administratif
+ * 
+ * Valide les données selon les règles métier de la méthode 3CL ADEME
  */
 
-import { z } from 'zod';
 import {
-  DPE,
-  Mur,
-  Fenetre,
-  InstallationChauffage,
-  InstallationECS,
-  DPEValidationError,
-  ZoneClimatique,
-  TypeBatiment,
-  TypeMur,
-  TypeVitrage,
-  TypeMenuiserie,
-  TypeChauffage,
-  TypeECS,
-  TypeVentilation
-} from '../types/dpe';
+  IValidationService,
+  ValidationRule,
+  ValidationOptions,
+  CoherenceRule,
+} from "../types/services";
+import {
+  ValidationResult,
+  ValidationError,
+} from "../types/validation";
 
 // ============================================================================
-// SCHEMAS ZOD DE VALIDATION
+// RÈGLES DE VALIDATION PAR ÉTAPE
 // ============================================================================
 
-const ZoneClimatiqueSchema = z.enum(['H1', 'H2', 'H3']);
-const AltitudeSchema = z.enum(['moins_400m', '400_800m', 'plus_800m']);
-const TypeBatimentSchema = z.enum(['maison', 'appartement', 'immeuble']);
+const STEP_VALIDATION_RULES: Record<number, ValidationRule[]> = {
+  // Étape 1: Informations administratives
+  1: [
+    {
+      id: "numero_dpe",
+      field: "numero_dpe",
+      required: true,
+      type: "string",
+      pattern: /^DPE-\d{2}-\d{3}-\d{3}-[A-Z]$/,
+      message: "Le numéro DPE doit être au format DPE-XX-XXX-XXX-X",
+    },
+    {
+      id: "date_visite",
+      field: "date_visite",
+      required: true,
+      type: "date",
+      message: "La date de visite est requise",
+    },
+    {
+      id: "proprietaire.nom",
+      field: "proprietaire.nom",
+      required: true,
+      type: "string",
+      minLength: 2,
+      maxLength: 255,
+      message: "Le nom du propriétaire est requis (2-255 caractères)",
+    },
+    {
+      id: "adresse_logement.adresse",
+      field: "adresse_logement.adresse",
+      required: true,
+      type: "string",
+      minLength: 5,
+      maxLength: 500,
+      message: "L'adresse du logement est requise (5-500 caractères)",
+    },
+  ],
 
-const MurSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  type_mur: z.enum([
-    'pierre_taille_seul', 'pierre_taille_remplissage', 'pise_terre',
-    'pan_bois_sans_remplissage', 'pan_bois_avec_remplissage', 'bois_rondins',
-    'briques_pleines', 'briques_doubles_lame_air', 'briques_creuses',
-    'blocs_beton_pleins', 'ossature_bois_isolant_avant_2001', 'cloison_platre',
-    'beton_cellulaire', 'inconnu'
-  ]),
-  surface_totale: z.number().positive(),
-  isolation: z.boolean(),
-  u_mur: z.number().positive(),
-  methode_calcul: z.string().min(1),
-  localisation: z.enum(['exterieur', 'local_non_chauffe', 'terre_plein', 'sous_sol']),
-  epaisseur_cm: z.number().positive().optional(),
-  type_isolant: z.string().optional(),
-  epaisseur_isolant_cm: z.number().positive().optional(),
-  resistance_isolant: z.number().positive().optional(),
-  annee_isolation: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  orientation: z.enum(['nord', 'sud', 'est', 'ouest', 'nord_est', 'nord_ouest', 'sud_est', 'sud_ouest']).optional(),
-  u_mur_nu: z.number().positive().optional()
-});
+  // Étape 2: Caractéristiques générales
+  2: [
+    {
+      id: "type_batiment",
+      field: "type_batiment",
+      required: true,
+      type: "enum",
+      enumValues: ["maison", "appartement", "immeuble"],
+      message: "Le type de bâtiment est requis",
+    },
+    {
+      id: "periode_construction",
+      field: "periode_construction",
+      required: true,
+      type: "enum",
+      enumValues: [
+        "avant_1948",
+        "1948-1974",
+        "1975-1977",
+        "1978-1982",
+        "1983-1988",
+        "1989-2000",
+        "2001-2005",
+        "2006-2012",
+        "2013-2021",
+        "apres_2021",
+      ],
+      message: "La période de construction est requise",
+    },
+    {
+      id: "surface_habitable",
+      field: "surface_habitable",
+      required: true,
+      type: "number",
+      min: 1,
+      max: 10000,
+      message: "La surface habitable doit être comprise entre 1 et 10000 m²",
+    },
+    {
+      id: "nombre_niveaux",
+      field: "nombre_niveaux",
+      required: true,
+      type: "number",
+      min: 1,
+      max: 50,
+      message: "Le nombre de niveaux doit être compris entre 1 et 50",
+    },
+  ],
 
-const FenetreSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  surface_totale: z.number().positive(),
-  type_vitrage: z.enum(['simple', 'double', 'triple']),
-  lame_air_mm: z.number().int().min(4).max(25),
-  traitement_pe: z.boolean().optional(),
-  type_gaz_lame: z.enum(['air', 'argon', 'krypton']).optional(),
-  ug: z.number().positive(),
-  type_menuiserie: z.enum(['pvc', 'bois', 'aluminium', 'mixte_bois_alu', 'mixte_pvc_alu']),
-  presence_joint: z.boolean().optional(),
-  uw: z.number().positive(),
-  type_volet: z.enum([
-    'aucun', 'volet_roulant_bois', 'volet_roulant_pvc', 'volet_roulant_alu',
-    'persienne_pleine', 'persienne_orientable', 'jalousie', 'store_enrouleur'
-  ]),
-  ujn: z.number().positive().optional(),
-  orientation: z.enum(['nord', 'sud', 'est', 'ouest', 'nord_est', 'nord_ouest', 'sud_est', 'sud_ouest']),
-  u_final: z.number().positive(),
-  sw: z.number().positive().optional()
-});
+  // Étape 3: Murs
+  3: [
+    {
+      id: "murs",
+      field: "murs",
+      required: true,
+      type: "array",
+      minLength: 1,
+      message: "Au moins un mur doit être défini",
+    },
+  ],
 
-const PlancherBasSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  type_plancher: z.enum(['dalle_beton', 'plancher_bois', 'plancher_hourdis', 'inconnu']),
-  surface_totale: z.number().positive(),
-  isolation: z.boolean(),
-  u_plancher: z.number().positive(),
-  methode_calcul: z.string().min(1),
-  localisation: z.enum(['terre_plein', 'vide_sanitaire', 'local_non_chauffe', 'sous_sol']),
-  type_isolant: z.string().optional(),
-  epaisseur_isolant_cm: z.number().positive().optional(),
-  resistance_isolant: z.number().positive().optional(),
-  annee_isolation: z.number().int().min(1800).max(new Date().getFullYear()).optional()
-});
+  // Étape 4: Baies vitrées
+  4: [
+    {
+      id: "baies_vitrees",
+      field: "baies_vitrees",
+      required: true,
+      type: "array",
+      minLength: 0,
+      message: "Les baies vitrées doivent être définies (peut être vide)",
+    },
+  ],
 
-const PlancherHautSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  type_plancher: z.enum(['combles_perdus', 'combles_amenages', 'toiture_terrasse', 'sous_toiture', 'inconnu']),
-  surface_totale: z.number().positive(),
-  isolation: z.boolean(),
-  u_plancher: z.number().positive(),
-  methode_calcul: z.string().min(1),
-  type_isolant: z.string().optional(),
-  epaisseur_isolant_cm: z.number().positive().optional(),
-  resistance_isolant: z.number().positive().optional(),
-  annee_isolation: z.number().int().min(1800).max(new Date().getFullYear()).optional()
-});
+  // Étape 5: Planchers bas
+  5: [
+    {
+      id: "planchers_bas",
+      field: "planchers_bas",
+      required: true,
+      type: "array",
+      minLength: 1,
+      message: "Au moins un plancher bas doit être défini",
+    },
+  ],
 
-const InstallationChauffageSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  type_chauffage: z.enum([
-    'chaudiere_standard', 'chaudiere_bassee_temperature', 'chaudiere_condensation',
-    'chaudiere_bois', 'poele_bois', 'insert_cheminee',
-    'pompe_a_chaleur_air_air', 'pompe_a_chaleur_air_eau', 'pompe_a_chaleur_eau_eau',
-    'radiateur_electrique', 'radiateur_electrique_inertie', 'plancher_chauffant_electrique',
-    'poele_gaz', 'poele_fioul', 'reseau_chaleur', 'autre'
-  ]),
-  type_energie: z.enum([
-    'electricite', 'gaz_naturel', 'fioul', 'propane', 'bois_buches',
-    'bois_pellets', 'bois_plaquettes', 'reseau_chaleur', 'charbon', 'autre'
-  ]),
-  surface_chauffee: z.number().positive(),
-  puissance_nominale_kw: z.number().positive().optional(),
-  rendement: z.number().positive().max(1.5).optional(),
-  annee_installation: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  collectif: z.boolean().optional(),
-  comptage_individuel: z.boolean().optional(),
-  repartition: z.enum(['radiateur', 'plancher_chauffant', 'air_pulse']).optional(),
-  regulation: z.enum(['sans', 'thermostat_simple', 'programmation', 'regulation_optimisee']).optional(),
-  presence_robinets_thermostatiques: z.boolean().optional()
-});
+  // Étape 6: Ponts thermiques
+  6: [
+    {
+      id: "ponts_thermiques",
+      field: "ponts_thermiques",
+      required: true,
+      type: "array",
+      minLength: 0,
+      message: "Les ponts thermiques doivent être définis (peut être vide)",
+    },
+  ],
 
-const InstallationECSSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  description: z.string().min(1),
-  type_ecs: z.enum([
-    'cumulus_electrique', 'cumulus_gaz', 'chaudiere_multi_batiment',
-    'chaudiere_mono_batiment', 'chaudiere_individuelle', 'pompe_a_chaleur',
-    'solaire_individuel', 'solaire_collectif', 'reseau_chaleur',
-    'instantane_gaz', 'cumulus_thermodynamique', 'autre'
-  ]),
-  type_energie: z.enum([
-    'electricite', 'gaz_naturel', 'fioul', 'propane', 'bois_buches',
-    'bois_pellets', 'bois_plaquettes', 'reseau_chaleur', 'charbon', 'autre'
-  ]),
-  nombre_personnes: z.number().int().positive(),
-  volume_ballon_litres: z.number().positive().optional(),
-  puissance_nominale_kw: z.number().positive().optional(),
-  rendement: z.number().positive().max(2).optional(),
-  annee_installation: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  collectif: z.boolean().optional(),
-  comptage_individuel: z.boolean().optional()
-});
+  // Étape 7: Ventilation
+  7: [
+    {
+      id: "ventilation.type_ventilation",
+      field: "ventilation.type_ventilation",
+      required: true,
+      type: "string",
+      message: "Le type de ventilation est requis",
+    },
+  ],
 
-const InstallationVentilationSchema = z.object({
-  id: z.string().min(1),
-  dpe_id: z.string().min(1),
-  type_ventilation: z.enum([
-    'naturelle', 'autoreglable', 'hygro_a', 'hygro_b', 'double_flux',
-    'simple_flux_haute_performance', 'vmc_collective', 'vmc_individuelle', 'vmi', 'autre'
-  ]),
-  annee_installation: z.number().int().min(1800).max(new Date().getFullYear()).optional(),
-  debit_ventilation_m3_h: z.number().positive().optional(),
-  presence_echangeur_thermique: z.boolean().optional(),
-  rendement_echangeur: z.number().positive().max(1).optional()
-});
+  // Étape 8: Chauffage
+  8: [
+    {
+      id: "chauffage.generateurs",
+      field: "chauffage.generateurs",
+      required: true,
+      type: "array",
+      minLength: 1,
+      message: "Au moins un générateur de chauffage doit être défini",
+    },
+  ],
 
-const DPESchema = z.object({
-  id: z.string().min(1),
-  numero_dpe: z.string().min(1),
-  user_id: z.string().min(1),
-  adresse: z.string().min(5),
-  code_postal: z.string().regex(/^\d{5}$/),
-  commune: z.string().min(2),
-  departement: z.string().min(2),
-  type_batiment: TypeBatimentSchema,
-  annee_construction: z.number().int().min(1000).max(new Date().getFullYear()),
-  epoque_construction: z.enum([
-    'avant_1948', '1948_1968', '1969_1974', '1975_1977', '1978_1982',
-    '1983_1988', '1989_1999', '2000_2005', '2006_2012', 'apres_2012'
-  ]),
-  surface_habitable: z.number().positive().max(10000),
-  nombre_niveaux: z.number().int().positive().max(50),
-  nombre_logements: z.number().int().positive().optional(),
-  zone_climatique: ZoneClimatiqueSchema,
-  altitude: AltitudeSchema,
-  murs: z.array(MurSchema).min(1),
-  planchers_bas: z.array(PlancherBasSchema),
-  planchers_hauts: z.array(PlancherHautSchema),
-  fenetres: z.array(FenetreSchema),
-  portes: z.array(z.object({
-    id: z.string().min(1),
-    dpe_id: z.string().min(1),
-    description: z.string().min(1),
-    surface_totale: z.number().positive(),
-    u_porte: z.number().positive(),
-    orientation: z.string().optional()
-  })),
-  ponts_thermiques: z.array(z.object({
-    id: z.string().min(1),
-    dpe_id: z.string().min(1),
-    type_pont: z.enum(['mur_plancher_bas', 'mur_plancher_haut', 'mur_refend', 'menuiserie', 'angle']),
-    longueur: z.number().positive(),
-    k_pont: z.number().positive(),
-    deperdition_w_k: z.number().positive()
-  })),
-  installations_chauffage: z.array(InstallationChauffageSchema),
-  installations_ecs: z.array(InstallationECSSchema),
-  installations_ventilation: z.array(InstallationVentilationSchema),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-  statut: z.enum(['brouillon', 'valide', 'signe', 'annule']),
-  version_methode: z.string().min(1)
-});
+  // Étape 9: ECS
+  9: [
+    {
+      id: "ecs.generateurs",
+      field: "ecs.generateurs",
+      required: true,
+      type: "array",
+      minLength: 1,
+      message: "Au moins un générateur d'ECS doit être défini",
+    },
+  ],
+
+  // Étape 10-13: Optionnelles ou validation finale
+  10: [],
+  11: [],
+  12: [],
+  13: [],
+};
 
 // ============================================================================
-// INTERFACE DE RÉSULTAT DE VALIDATION
+// RÈGLES DE COHÉRENCE MÉTIER
 // ============================================================================
 
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
-  warnings: ValidationWarning[];
-}
+const BUSINESS_COHERENCE_RULES: CoherenceRule[] = [
+  {
+    id: "surface_positive",
+    description: "La surface habitable doit être positive",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
+      const surface = cg?.surface_habitable;
+      return typeof surface === "number" && surface > 0;
+    },
+    message: "La surface habitable doit être supérieure à 0 m²",
+    severity: "error",
+    applicableSteps: [2],
+  },
+  {
+    id: "surface_max",
+    description: "La surface habitable semble anormalement élevée",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
+      const surface = cg?.surface_habitable;
+      return typeof surface === "number" && surface < 10000;
+    },
+    message: "La surface habitable semble anormalement élevée (> 10000 m²)",
+    severity: "warning",
+    applicableSteps: [2],
+  },
+  {
+    id: "nombre_niveaux_coherent",
+    description: "Le nombre de niveaux doit être cohérent",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
+      const niveaux = cg?.nombre_niveaux;
+      return typeof niveaux === "number" && niveaux >= 1 && niveaux <= 50;
+    },
+    message: "Le nombre de niveaux doit être compris entre 1 et 50",
+    severity: "error",
+    applicableSteps: [2],
+  },
+  {
+    id: "baies_surface_coherente",
+    description: "La surface des baies ne doit pas dépasser la surface habitable",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
+      const surfaceHabitable = cg?.surface_habitable || 0;
+      const env = d.enveloppe as Record<string, Array<{ surface?: number }>> | undefined;
+      const baies = env?.baies_vitrees || [];
+      const surfaceBaies = baies.reduce((sum: number, b) => sum + (b.surface || 0), 0);
+      return surfaceBaies <= surfaceHabitable * 1.5;
+    },
+    message: "La surface totale des baies vitrées semble incohérente avec la surface habitable",
+    severity: "warning",
+    applicableSteps: [4],
+  },
+  {
+    id: "ventilation_q4pa_coherent",
+    description: "Le Q4Pa doit être cohérent avec le type de ventilation",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const inst = d.installations as Record<string, Record<string, number>> | undefined;
+      const q4pa = inst?.ventilation?.q4pa;
+      if (q4pa === undefined || q4pa === null) return true;
+      return q4pa >= 0.5 && q4pa <= 15;
+    },
+    message: "Le Q4Pa doit être compris entre 0.5 et 15 m³/(h·m²)",
+    severity: "error",
+    applicableSteps: [7],
+  },
+  {
+    id: "generateur_chauffage_age",
+    description: "L'âge du générateur de chauffage doit être cohérent",
+    check: (data: unknown): boolean => {
+      const d = data as Record<string, unknown>;
+      const inst = d.installations as Record<string, unknown> | undefined;
+      const chauffage = inst?.chauffage as Record<string, Array<Record<string, number>>> | undefined;
+      const generateurs = chauffage?.generateurs;
+      if (!Array.isArray(generateurs) || generateurs.length === 0) return true;
+      
+      const anneeInstall = generateurs[0]?.annee_installation;
+      if (!anneeInstall) return true;
+      
+      const currentYear = new Date().getFullYear();
+      return anneeInstall >= 1900 && anneeInstall <= currentYear;
+    },
+    message: "L'année d'installation du générateur de chauffage est incohérente",
+    severity: "error",
+    applicableSteps: [8],
+  },
+];
 
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
+export class ValidationService implements IValidationService {
+  private customRules: ValidationRule[] = [];
+  private customCoherenceRules: CoherenceRule[] = [];
 
-export interface ValidationWarning {
-  field: string;
-  message: string;
-  code: string;
-}
-
-// ============================================================================
-// SERVICE DE VALIDATION
-// ============================================================================
-
-export class ValidationService {
-  
   /**
-   * Valide un objet DPE complet
+   * Récupère une valeur imbriquée dans un objet
    */
-  validateDPE(dpe: unknown): ValidationResult {
-    const result = DPESchema.safeParse(dpe);
-    
-    if (result.success) {
-      // Validation métier additionnelle
-      const businessValidation = this.validateBusinessRules(result.data);
-      return businessValidation;
+  private getNestedValue(obj: unknown, path: string): unknown {
+    const keys = path.split(".");
+    let current: unknown = obj;
+
+    for (const key of keys) {
+      if (current === null || current === undefined) {
+        return undefined;
+      }
+      current = (current as Record<string, unknown>)[key];
     }
 
-    const errors: ValidationError[] = result.error.errors.map(err => ({
-      field: err.path.join('.'),
-      message: err.message,
-      code: 'VALIDATION_ERROR'
-    }));
-
-    return {
-      valid: false,
-      errors,
-      warnings: []
-    };
+    return current;
   }
 
   /**
-   * Valide un mur spécifique
+   * Valide une règle sur une valeur
    */
-  validateMur(mur: unknown): ValidationResult {
-    const result = MurSchema.safeParse(mur);
-    
-    if (!result.success) {
+  private validateRule(rule: ValidationRule, value: unknown, data: unknown): ValidationError | null {
+    // Vérification required
+    if (rule.required && (value === undefined || value === null || value === "")) {
       return {
-        valid: false,
-        errors: result.error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-          code: 'VALIDATION_ERROR'
-        })),
-        warnings: []
+        code: "required",
+        field: rule.field,
+        message: rule.message,
+        severity: "error",
       };
     }
 
-    const warnings: ValidationWarning[] = [];
-    
-    // Avertissements métier
-    if (result.data.isolation && !result.data.annee_isolation && !result.data.resistance_isolant) {
-      warnings.push({
-        field: 'isolation',
-        message: 'Mur isolé mais sans année ni résistance d\'isolation précisée',
-        code: 'MISSING_ISOLATION_DETAILS'
-      });
+    // Si non requis et valeur vide, pas d'erreur
+    if (!rule.required && (value === undefined || value === null || value === "")) {
+      return null;
     }
 
-    return {
-      valid: true,
-      errors: [],
-      warnings
-    };
+    // Vérification du type
+    if (value !== undefined && value !== null) {
+      const actualType = Array.isArray(value) ? "array" : typeof value;
+      
+      if (rule.type === "date") {
+        const dateValue = value instanceof Date ? value : new Date(value as string);
+        if (isNaN(dateValue.getTime())) {
+          return {
+            code: "invalid_date",
+            field: rule.field,
+            message: `${rule.field} doit être une date valide`,
+            severity: "error",
+          };
+        }
+      } else if (rule.type !== actualType) {
+        return {
+          code: "invalid_type",
+          field: rule.field,
+          message: `${rule.field} doit être de type ${rule.type}`,
+          severity: "error",
+        };
+      }
+
+      // Vérification enum - traité comme string avec valeurs contraintes
+      if (rule.enumValues && rule.enumValues.length > 0) {
+        const strValue = String(value);
+        if (!rule.enumValues.map(String).includes(strValue)) {
+          return {
+            code: "invalid_enum",
+            field: rule.field,
+            message: `${rule.field} doit être l'une des valeurs: ${String(rule.enumValues.join(", "))}`,
+            severity: "error",
+          };
+        }
+      }
+
+      // Vérification number (min/max)
+      if (rule.type === "number" && typeof value === "number") {
+        if (rule.min !== undefined && value < rule.min) {
+          return {
+            code: "min_value",
+            field: rule.field,
+            message: `${rule.field} doit être supérieur ou égal à ${rule.min}`,
+            severity: "error",
+          };
+        }
+        if (rule.max !== undefined && value > rule.max) {
+          return {
+            code: "max_value",
+            field: rule.field,
+            message: `${rule.field} doit être inférieur ou égal à ${rule.max}`,
+            severity: "error",
+          };
+        }
+      }
+
+      // Vérification string (minLength/maxLength/pattern)
+      if (rule.type === "string" && typeof value === "string") {
+        if (rule.minLength !== undefined && value.length < rule.minLength) {
+          return {
+            code: "min_length",
+            field: rule.field,
+            message: `${rule.field} doit contenir au moins ${rule.minLength} caractères`,
+            severity: "error",
+          };
+        }
+        if (rule.maxLength !== undefined && value.length > rule.maxLength) {
+          return {
+            code: "max_length",
+            field: rule.field,
+            message: `${rule.field} doit contenir au plus ${rule.maxLength} caractères`,
+            severity: "error",
+          };
+        }
+        if (rule.pattern && !rule.pattern.test(value)) {
+          return {
+            code: "pattern_mismatch",
+            field: rule.field,
+            message: rule.message,
+            severity: "error",
+          };
+        }
+      }
+
+      // Vérification array (minLength)
+      if (rule.type === "array" && Array.isArray(value)) {
+        if (rule.minLength !== undefined && value.length < rule.minLength) {
+          return {
+            code: "min_items",
+            field: rule.field,
+            message: `${rule.field} doit contenir au moins ${rule.minLength} élément(s)`,
+            severity: "error",
+          };
+        }
+      }
+
+      // Validateur personnalisé
+      if (rule.customValidator) {
+        const customError = rule.customValidator(value, data);
+        if (customError) {
+          return customError;
+        }
+      }
+    }
+
+    return null;
   }
 
   /**
-   * Valide une fenêtre
+   * Valide un DPE complet ou partiel
    */
-  validateFenetre(fenetre: unknown): ValidationResult {
-    const result = FenetreSchema.safeParse(fenetre);
-    
-    if (!result.success) {
-      return {
-        valid: false,
-        errors: result.error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-          code: 'VALIDATION_ERROR'
-        })),
-        warnings: []
-      };
-    }
-
-    const warnings: ValidationWarning[] = [];
-    const data = result.data;
-
-    // Vérification cohérence Ug/Uw
-    if (data.uw < data.ug) {
-      warnings.push({
-        field: 'uw',
-        message: 'Uw ne devrait pas être inférieur à Ug (la menuiserie dégrade le vitrage)',
-        code: 'UW_UG_INCOHERENCE'
-      });
-    }
-
-    return {
-      valid: true,
-      errors: [],
-      warnings
-    };
-  }
-
-  /**
-   * Valide une installation de chauffage
-   */
-  validateInstallationChauffage(installation: unknown): ValidationResult {
-    const result = InstallationChauffageSchema.safeParse(installation);
-    
-    if (!result.success) {
-      return {
-        valid: false,
-        errors: result.error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-          code: 'VALIDATION_ERROR'
-        })),
-        warnings: []
-      };
-    }
-
-    return { valid: true, errors: [], warnings: [] };
-  }
-
-  /**
-   * Valide une installation ECS
-   */
-  validateInstallationECS(installation: unknown): ValidationResult {
-    const result = InstallationECSSchema.safeParse(installation);
-    
-    if (!result.success) {
-      return {
-        valid: false,
-        errors: result.error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message,
-          code: 'VALIDATION_ERROR'
-        })),
-        warnings: []
-      };
-    }
-
-    return { valid: true, errors: [], warnings: [] };
-  }
-
-  /**
-   * Validation des règles métier complexes
-   */
-  private validateBusinessRules(dpe: DPE): ValidationResult {
+  validate(dpeData: unknown, options: ValidationOptions = {}): ValidationResult {
     const errors: ValidationError[] = [];
-    const warnings: ValidationWarning[] = [];
+    const warnings: ValidationError[] = [];
+    const completedSteps: number[] = [];
 
-    // 1. Surface habitable cohérente avec les surfaces des parois
-    const surfaceMurs = dpe.murs.reduce((sum, m) => sum + m.surface_totale, 0);
-    const surfacePlanchersBas = dpe.planchers_bas.reduce((sum, p) => sum + p.surface_totale, 0);
-    const surfacePlanchersHauts = dpe.planchers_hauts.reduce((sum, p) => sum + p.surface_totale, 0);
+    const { context, includeWarnings = true, stopOnFirstError = false } = options;
 
-    if (surfacePlanchersBas > 0 && surfacePlanchersHauts > 0) {
-      const ratio = Math.max(surfacePlanchersBas, surfacePlanchersHauts) / Math.min(surfacePlanchersBas, surfacePlanchersHauts);
-      if (ratio > 1.3) {
-        warnings.push({
-          field: 'planchers',
-          message: `Incohérence surface planchers bas (${surfacePlanchersBas}) vs hauts (${surfacePlanchersHauts})`,
-          code: 'SURFACE_PLANCHERS_INCOHERENT'
-        });
+    // Détermine les étapes à valider
+    const stepsToValidate = context?.step 
+      ? [context.step] 
+      : Array.from({ length: 13 }, (_, i) => i + 1);
+
+    // Valide chaque étape
+    for (const step of stepsToValidate) {
+      const stepRules = this.getRulesForStep(step);
+      let stepValid = true;
+
+      for (const rule of stepRules) {
+        const value = this.getNestedValue(dpeData, rule.field);
+        const error = this.validateRule(rule, value, dpeData);
+
+        if (error) {
+          stepValid = false;
+          errors.push({ ...error, step });
+          
+          if (stopOnFirstError) {
+            break;
+          }
+        }
+      }
+
+      // Vérifie les règles de cohérence pour cette étape
+      const coherenceRules = this.getCoherenceRulesForStep(step);
+      for (const rule of coherenceRules) {
+        const isValid = rule.check(dpeData);
+        
+        if (!isValid) {
+          const error: ValidationError = {
+            code: rule.id,
+            field: "coherence",
+            message: rule.message,
+            severity: rule.severity,
+            step,
+          };
+
+          if (rule.severity === "error") {
+            stepValid = false;
+            errors.push(error);
+          } else if (includeWarnings) {
+            warnings.push(error);
+          }
+        }
+      }
+
+      if (stepValid) {
+        completedSteps.push(step);
+      }
+
+      if (stopOnFirstError && errors.length > 0) {
+        break;
       }
     }
-
-    // 2. Au moins un système de chauffage ou ECS
-    if (dpe.installations_chauffage.length === 0 && dpe.installations_ecs.length === 0) {
-      errors.push({
-        field: 'installations',
-        message: 'Au moins une installation de chauffage ou ECS est requise',
-        code: 'NO_INSTALLATION'
-      });
-    }
-
-    // 3. Vérification des surfaces chauffées
-    const totalSurfaceChauffee = dpe.installations_chauffage.reduce((sum, i) => sum + i.surface_chauffee, 0);
-    if (totalSurfaceChauffee > dpe.surface_habitable * 1.5) {
-      warnings.push({
-        field: 'installations_chauffage.surface_chauffee',
-        message: `Surface chauffée totale (${totalSurfaceChauffee}) supérieure à 150% de la surface habitable (${dpe.surface_habitable})`,
-        code: 'SURFACE_CHAUFFEE_EXCESSIVE'
-      });
-    }
-
-    // 4. Cohérence année construction / époque
-    const epoqueFromAnnee = this.getEpoqueFromAnnee(dpe.annee_construction);
-    if (epoqueFromAnnee !== dpe.epoque_construction) {
-      warnings.push({
-        field: 'epoque_construction',
-        message: `Époque de construction (${dpe.epoque_construction}) incohérente avec l'année (${dpe.annee_construction})`,
-        code: 'EPOQUE_ANNEE_INCOHERENT'
-      });
-    }
-
-    // 5. Vérification des U cohérents
-    dpe.murs.forEach((mur, index) => {
-      if (mur.u_mur > 4.0) {
-        warnings.push({
-          field: `murs[${index}].u_mur`,
-          message: `U mur (${mur.u_mur}) très élevé, vérifier la saisie`,
-          code: 'U_MUR_ELEVE'
-        });
-      }
-    });
 
     return {
       valid: errors.length === 0,
       errors,
-      warnings
+      warnings,
+      completedSteps,
+      currentStep: context?.step ?? Math.max(...completedSteps, 0) + 1,
     };
   }
 
   /**
-   * Détermine l'époque de construction à partir de l'année
+   * Valide une étape spécifique du wizard
    */
-  private getEpoqueFromAnnee(annee: number): string {
-    if (annee < 1948) return 'avant_1948';
-    if (annee <= 1968) return '1948_1968';
-    if (annee <= 1974) return '1969_1974';
-    if (annee <= 1977) return '1975_1977';
-    if (annee <= 1982) return '1978_1982';
-    if (annee <= 1988) return '1983_1988';
-    if (annee <= 1999) return '1989_1999';
-    if (annee <= 2005) return '2000_2005';
-    if (annee <= 2012) return '2006_2012';
-    return 'apres_2012';
+  validateStep(step: number, data: unknown): ValidationResult {
+    return this.validate(data, { context: { step }, includeWarnings: true });
   }
 
   /**
-   * Valide un numéro de DPE selon le format ADEME
-   * Format attendu: DPE-YYYY-NNNNNN ou similaire
+   * Valide un champ spécifique
    */
-  validateNumeroDPE(numero: string): boolean {
-    const dpeRegex = /^DPE-\d{4}-\d{6,}$/i;
-    return dpeRegex.test(numero);
+  validateField(field: string, value: unknown, data?: unknown): ValidationError | null {
+    // Cherche la règle correspondante
+    for (const stepRules of Object.values(STEP_VALIDATION_RULES)) {
+      const rule = stepRules.find((r) => r.field === field);
+      if (rule) {
+        return this.validateRule(rule, value, data ?? {});
+      }
+    }
+
+    // Cherche dans les règles personnalisées
+    const customRule = this.customRules.find((r) => r.field === field);
+    if (customRule) {
+      return this.validateRule(customRule, value, data ?? {});
+    }
+
+    // Aucune règle trouvée, considère comme valide
+    return null;
   }
 
   /**
-   * Valide un code postal français
+   * Ajoute une règle de validation personnalisée
    */
-  validateCodePostal(codePostal: string): boolean {
-    return /^\d{5}$/.test(codePostal);
+  addRule(rule: ValidationRule): void {
+    this.customRules.push(rule);
   }
 
   /**
-   * Valide une adresse email
+   * Ajoute une règle de cohérence
    */
-  validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  addCoherenceRule(rule: CoherenceRule): void {
+    this.customCoherenceRules.push(rule);
   }
 
   /**
-   * Vérifie si une valeur U est conforme à la RT existante
+   * Récupère les règles pour une étape
    */
-  isUValueCompliant(uValue: number, element: 'mur' | 'plancher_bas' | 'plancher_haut' | 'fenetre', zoneClimatique: ZoneClimatique): boolean {
-    const seuils = {
-      H1: { mur: 0.36, plancher_bas: 0.27, plancher_haut: 0.27, fenetre: 2.0 },
-      H2: { mur: 0.40, plancher_bas: 0.30, plancher_haut: 0.30, fenetre: 2.3 },
-      H3: { mur: 0.45, plancher_bas: 0.35, plancher_haut: 0.35, fenetre: 2.6 }
-    };
-
-    return uValue <= seuils[zoneClimatique][element];
+  getRulesForStep(step: number): ValidationRule[] {
+    const baseRules = STEP_VALIDATION_RULES[step] ?? [];
+    return [...baseRules, ...this.customRules];
   }
+
+  /**
+   * Récupère les règles de cohérence pour une étape
+   */
+  private getCoherenceRulesForStep(step: number): CoherenceRule[] {
+    const baseRules = BUSINESS_COHERENCE_RULES.filter(
+      (r) => !r.applicableSteps || r.applicableSteps.includes(step)
+    );
+    const customRules = this.customCoherenceRules.filter(
+      (r) => !r.applicableSteps || r.applicableSteps.includes(step)
+    );
+    return [...baseRules, ...customRules];
+  }
+
+  /**
+   * Vérifie si une étape est complète
+   */
+  isStepComplete(step: number, data: unknown): boolean {
+    const result = this.validateStep(step, data);
+    return result.valid;
+  }
+
+  /**
+   * Calcule la progression globale
+   */
+  calculateProgress(data: unknown): number {
+    const result = this.validate(data);
+    const completedSteps = result.completedSteps.length;
+    const totalSteps = 13;
+    return Math.round((completedSteps / totalSteps) * 100);
+  }
+}
+
+// Export singleton factory
+let validationServiceInstance: ValidationService | null = null;
+
+export function createValidationService(): ValidationService {
+  if (!validationServiceInstance) {
+    validationServiceInstance = new ValidationService();
+  }
+  return validationServiceInstance;
+}
+
+export function getValidationService(): ValidationService | null {
+  return validationServiceInstance;
 }

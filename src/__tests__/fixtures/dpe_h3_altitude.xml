@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dpe xmlns="http://ademe.org/dpe" version="2.2">
+  <administratif>
+    <numero_dpe>DPE-2024-H3-004</numero_dpe>
+    <statut>signe</statut>
+    <date_visite_diagnostiqueur>2024-04-20T10:30:00Z</date_visite_diagnostiqueur>
+    <date_etablissement_dpe>2024-04-22T14:00:00Z</date_etablissement_dpe>
+  </administratif>
+  <logement>
+    <caracteristique_generale>
+      <type_batiment>maison</type_batiment>
+      <periode_construction>1975_1977</periode_construction>
+      <surface_habitable>110.00</surface_habitable>
+      <nombre_niveaux>2</nombre_niveaux>
+    </caracteristique_generale>
+    <climat>
+      <zone_climatique>H3</zone_climatique>
+      <altitude>plus_800m</altitude>
+    </climat>
+  </logement>
+  <performance_energetique>
+    <consommation_energie_finale>24200.00</consommation_energie_finale>
+    <consommation_energie_primaire>26400.00</consommation_energie_primaire>
+    <consommation_energie_primaire_m2>240.00</consommation_energie_primaire_m2>
+    <emission_ges>3850.00</emission_ges>
+    <emission_ges_m2>35.00</emission_ges_m2>
+    <classe_energie>F</classe_energie>
+    <classe_ges>E</classe_ges>
+  </performance_energetique>
+  <cout>
+    <chauffage>1650.00</chauffage>
+    <ecs>420.00</ecs>
+    <eclairage>85.00</eclairage>
+    <auxiliaires>45.00</auxiliaires>
+  </cout>
+</dpe>

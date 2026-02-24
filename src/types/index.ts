@@ -3,45 +3,66 @@
  * Export centralisé de tous les types
  */
 
-// Types DPE principaux (exporter tout sauf ValidationError/ValidationResult qui sont dans validation.ts)
+// Types DPE principaux
 export {
-  EnumTypeBatiment,
+  EnumModeleDpe,
+  EnumVersionDpe,
   EnumPeriodeConstruction,
-  EnumTypeParoi,
-  EnumMateriauParoi,
-  EnumTypeVitrage,
-  EnumTypeMenuiserie,
-  EnumTypeVmc,
-  EnumTypeGenerateurChauffage,
-  EnumTypeGenerateurEcs,
+  EnumMethodeApplicationDpeLog,
+  EnumZoneClimatique,
+  EnumClasseAltitude,
+  EnumTypeAdjacence,
+  EnumOrientation,
   EnumEtiquetteDpe,
   DPEDocument,
   Administratif,
-  CaracteristiquesGenerales,
+  Diagnostiqueur,
+  Geolocalisation,
+  Adresses,
+  AdresseDetail,
+  Logement,
+  CaracteristiqueGenerale,
+  Meteo,
   Enveloppe,
+  Inertie,
+  MurCollection,
   Mur,
+  MurDonneeEntree,
+  MurDonneeIntermediaire,
+  BaieVitreeCollection,
   BaieVitree,
-  Plancher,
-  PontThermique,
-  Installations,
+  BaieVitreeDonneeEntree,
+  BaieVitreeDonneeIntermediaire,
+  PlancherBasCollection,
+  PlancherBas,
+  PlancherBasDonneeEntree,
+  PlancherBasDonneeIntermediaire,
+  PlancherHautCollection,
+  PlancherHaut,
+  PlancherHautDonneeEntree,
+  PlancherHautDonneeIntermediaire,
+  InstallationChauffageCollection,
+  InstallationChauffage,
+  InstallationECSCollection,
+  InstallationECS,
   Ventilation,
-  Chauffage,
-  GenerateurChauffage,
-  EmetteurChauffage,
-  DistributionChauffage,
-  ECS,
-  GenerateurECS,
-  StockageECS,
-  Climatisation,
-  GenerateurClimatisation,
-  ProductionENR,
-  InstallationPhotovoltaique,
-  Resultats,
+  // ValidationError et ValidationResult sont exportés depuis validation.ts
   XMLExportOptions,
   XMLValidationResult,
 } from "./dpe";
 
 export * from "./tables-valeurs";
-export * from "./validation";
+
+// Exporte tout sauf ValidationRule qui est aussi dans services.ts
+export {
+  CoherenceConstraint,
+  REQUIRED_FIELDS_BY_STEP,
+  COHERENCE_CONSTRAINTS,
+  ValidationError,
+  ValidationResult,
+  StepProgress,
+  FormProgress,
+} from "./validation";
+
 export * from "./api-ademe";
 export * from "./services";

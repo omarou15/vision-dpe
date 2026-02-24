@@ -112,7 +112,7 @@ export const mockDPEDocument: DPEDocument = {
               paroi_lourde: 1,
               enum_type_isolation_id: 1,
               enum_methode_saisie_u_id: 1,
-              paroi_ancienne: 0,
+              enduit_isolant_paroi_ancienne: 0,
             },
             donnee_intermediaire: {
               b: 1.0,
@@ -128,7 +128,7 @@ export const mockDPEDocument: DPEDocument = {
               paroi_lourde: 1,
               enum_type_isolation_id: 1,
               enum_methode_saisie_u_id: 1,
-              paroi_ancienne: 0,
+              enduit_isolant_paroi_ancienne: 0,
             },
             donnee_intermediaire: {
               b: 1.0,
@@ -189,7 +189,7 @@ export const mockDPEDocument: DPEDocument = {
     },
     installation_chauffage_collection: undefined,
     installation_ecs_collection: undefined,
-    ventilation: {},
+    ventilation_collection: undefined,
   },
 };
 

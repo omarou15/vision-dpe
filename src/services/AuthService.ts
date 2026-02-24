@@ -1,112 +1,276 @@
 /**
- * AuthService - Service d'authentification
- * Gère la connexion, inscription et gestion des sessions utilisateur via Supabase
+ * AuthService - Service d'authentification Supabase
+ * Phase 1 - Module Administratif
+ * 
+ * Gère l'authentification des diagnostiqueurs via:
+ * - Email/password
+ * - OTP (One Time Password)
+ * - Sessions et tokens
  */
 
-import { createClient, SupabaseClient, User as SupabaseUser } from '@supabase/supabase-js';
-import { 
-  User, 
-  AuthCredentials, 
-  AuthResponse, 
+import {
+  createClient,
+  SupabaseClient,
+  AuthError as SupabaseAuthError,
+  Session,
+  User,
+} from "@supabase/supabase-js";
+import {
+  IAuthService,
+  AuthUser,
+  LoginCredentials,
+  OTPRequest,
+  OTPVerify,
+  AuthSession,
+  PasswordResetRequest,
+  PasswordUpdate,
+  AuthResult,
   AuthError,
-  UserRole 
-} from '../types/dpe';
+} from "../types/services";
 
-export interface AuthConfig {
-  supabaseUrl: string;
-  supabaseKey: string;
+interface UserProfile {
+  id: string;
+  full_name: string | null;
+  company: string | null;
+  numero_dpe_diagnostiqueur: string | null;
+  phone: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export class AuthService {
-  private client: SupabaseClient;
+export class AuthService implements IAuthService {
+  private supabase: SupabaseClient;
+  private currentSession: AuthSession | null = null;
+  private authStateCallbacks: Array<(user: AuthUser | null) => void> = [];
 
-  constructor(config: AuthConfig) {
-    this.client = createClient(config.supabaseUrl, config.supabaseKey);
+  constructor(
+    supabaseUrl: string,
+    supabaseKey: string
+  ) {
+    this.supabase = createClient(supabaseUrl, supabaseKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    });
+
+    // Écoute les changements d'état d'authentification
+    this.supabase.auth.onAuthStateChange((event, session) => {
+      void this.handleAuthStateChange(event, session);
+    });
   }
 
   /**
-   * Connexion avec email et mot de passe
+   * Mappe un utilisateur Supabase vers AuthUser
    */
-  async signIn(credentials: AuthCredentials): Promise<AuthResponse> {
+  private mapToAuthUser(user: User, profile?: UserProfile | null): AuthUser {
+    return {
+      id: user.id,
+      email: user.email ?? "",
+      fullName: profile?.full_name ?? (user.user_metadata?.["full_name"] as string) ?? null,
+      company: profile?.company ?? null,
+      numeroDpeDiagnostiqueur: profile?.numero_dpe_diagnostiqueur ?? null,
+      phone: profile?.phone ?? user.phone ?? null,
+      createdAt: profile?.created_at ?? user.created_at,
+      updatedAt: profile?.updated_at ?? user.updated_at ?? user.created_at,
+    };
+  }
+
+  /**
+   * Mappe une session Supabase vers AuthSession
+   */
+  private mapToAuthSession(session: Session, profile?: UserProfile | null): AuthSession {
+    return {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresAt: session.expires_at ?? Math.floor(Date.now() / 1000) + 3600,
+      user: this.mapToAuthUser(session.user, profile),
+    };
+  }
+
+  /**
+   * Récupère le profil utilisateur depuis la base
+   */
+  private async fetchUserProfile(userId: string): Promise<UserProfile | null> {
+    const { data, error } = await this.supabase
+      .from("users_profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return data as UserProfile;
+  }
+
+  /**
+   * Convertit une erreur Supabase en AuthError
+   */
+  private mapAuthError(error: SupabaseAuthError | Error | unknown): AuthError {
+    const err = error as SupabaseAuthError;
+    const code = err.status?.toString() ?? "unknown_error";
+    
+    const errorMessages: Record<string, string> = {
+      "400": "Requête invalide",
+      "401": "Non autorisé",
+      "403": "Accès interdit",
+      "404": "Utilisateur non trouvé",
+      "422": "Email invalide ou déjà utilisé",
+      "429": "Trop de tentatives, veuillez réessayer plus tard",
+      "500": "Erreur serveur",
+      "invalid_credentials": "Email ou mot de passe incorrect",
+      "user_not_found": "Utilisateur non trouvé",
+      "otp_expired": "Code OTP expiré",
+      "otp_invalid": "Code OTP invalide",
+    };
+
+    return {
+      code,
+      message: errorMessages[code] ?? err.message ?? "Une erreur est survenue",
+      field: err.code === "invalid_credentials" ? "email" : undefined,
+    };
+  }
+
+  /**
+   * Gère les changements d'état d'authentification
+   */
+  private async handleAuthStateChange(
+    _event: string,
+    session: Session | null
+  ): Promise<void> {
+    if (session) {
+      const profile = await this.fetchUserProfile(session.user.id);
+      this.currentSession = this.mapToAuthSession(session, profile);
+      this.notifyAuthStateChange(this.currentSession.user);
+    } else {
+      this.currentSession = null;
+      this.notifyAuthStateChange(null);
+    }
+  }
+
+  /**
+   * Notifie les callbacks d'état d'authentification
+   */
+  private notifyAuthStateChange(user: AuthUser | null): void {
+    this.authStateCallbacks.forEach((callback) => {
+      try {
+        callback(user);
+      } catch {
+        // Ignore les erreurs de callback
+      }
+    });
+  }
+
+  /**
+   * Connexion avec email/password
+   */
+  async login(credentials: LoginCredentials): Promise<AuthResult> {
     try {
-      const { data, error } = await this.client.auth.signInWithPassword({
+      const { data, error } = await this.supabase.auth.signInWithPassword({
         email: credentials.email,
-        password: credentials.password
+        password: credentials.password,
       });
 
       if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'AUTH_ERROR');
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
       }
 
-      if (!data.user || !data.session) {
-        throw new AuthError('Session invalide', 'INVALID_SESSION');
+      if (!data.session || !data.user) {
+        return {
+          success: false,
+          error: { code: "no_session", message: "Session non créée" },
+        };
       }
+
+      const profile = await this.fetchUserProfile(data.user.id);
+      this.currentSession = this.mapToAuthSession(data.session, profile);
 
       return {
-        user: this.mapSupabaseUser(data.user),
-        session: {
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_in: data.session.expires_in
-        },
-        error: null
+        success: true,
+        data: this.currentSession,
       };
-    } catch (err) {
-      if (err instanceof AuthError) {
-        return { user: null, session: null, error: err };
-      }
+    } catch (error) {
       return {
-        user: null,
-        session: null,
-        error: new AuthError(
-          err instanceof Error ? err.message : 'Erreur d\'authentification',
-          'UNKNOWN_ERROR'
-        )
+        success: false,
+        error: this.mapAuthError(error),
       };
     }
   }
 
   /**
-   * Inscription d'un nouvel utilisateur
+   * Demande d'OTP (One Time Password)
+   * Envoie un code OTP à l'email spécifié
    */
-  async signUp(credentials: AuthCredentials, metadata?: { full_name?: string; role?: UserRole }): Promise<AuthResponse> {
+  async requestOTP(request: OTPRequest): Promise<AuthResult> {
     try {
-      const { data, error } = await this.client.auth.signUp({
-        email: credentials.email,
-        password: credentials.password,
+      const { error } = await this.supabase.auth.signInWithOtp({
+        email: request.email,
         options: {
-          data: metadata
-        }
+          shouldCreateUser: false, // Ne crée pas d'utilisateur s'il n'existe pas
+        },
       });
 
       if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'SIGNUP_ERROR');
-      }
-
-      if (!data.user) {
-        throw new AuthError('Création utilisateur échouée', 'SIGNUP_FAILED');
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
       }
 
       return {
-        user: this.mapSupabaseUser(data.user),
-        session: data.session ? {
-          access_token: data.session.access_token,
-          refresh_token: data.session.refresh_token,
-          expires_in: data.session.expires_in
-        } : null,
-        error: null
+        success: true,
+        data: undefined,
       };
-    } catch (err) {
-      if (err instanceof AuthError) {
-        return { user: null, session: null, error: err };
-      }
+    } catch (error) {
       return {
-        user: null,
-        session: null,
-        error: new AuthError(
-          err instanceof Error ? err.message : 'Erreur d\'inscription',
-          'UNKNOWN_ERROR'
-        )
+        success: false,
+        error: this.mapAuthError(error),
+      };
+    }
+  }
+
+  /**
+   * Vérification de l'OTP et connexion
+   */
+  async verifyOTP(verify: OTPVerify): Promise<AuthResult> {
+    try {
+      const { data, error } = await this.supabase.auth.verifyOtp({
+        email: verify.email,
+        token: verify.otp,
+        type: "email",
+      });
+
+      if (error) {
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
+      }
+
+      if (!data.session || !data.user) {
+        return {
+          success: false,
+          error: { code: "no_session", message: "Session non créée" },
+        };
+      }
+
+      const profile = await this.fetchUserProfile(data.user.id);
+      this.currentSession = this.mapToAuthSession(data.session, profile);
+
+      return {
+        success: true,
+        data: this.currentSession,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: this.mapAuthError(error),
       };
     }
   }
@@ -114,33 +278,93 @@ export class AuthService {
   /**
    * Déconnexion
    */
-  async signOut(): Promise<{ error: Error | null }> {
+  async logout(): Promise<void> {
+    await this.supabase.auth.signOut();
+    this.currentSession = null;
+    this.notifyAuthStateChange(null);
+  }
+
+  /**
+   * Rafraîchissement de la session
+   */
+  async refreshSession(): Promise<AuthResult> {
     try {
-      const { error } = await this.client.auth.signOut();
+      const { data, error } = await this.supabase.auth.refreshSession();
+
       if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'SIGNOUT_ERROR');
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
       }
-      return { error: null };
-    } catch (err) {
+
+      if (!data.session || !data.user) {
+        return {
+          success: false,
+          error: { code: "no_session", message: "Impossible de rafraîchir la session" },
+        };
+      }
+
+      const profile = await this.fetchUserProfile(data.user.id);
+      this.currentSession = this.mapToAuthSession(data.session, profile);
+
       return {
-        error: err instanceof Error ? err : new Error('Erreur de déconnexion')
+        success: true,
+        data: this.currentSession,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: this.mapAuthError(error),
       };
     }
   }
 
   /**
-   * Récupération de mot de passe
+   * Récupère l'utilisateur courant
    */
-  async resetPassword(email: string): Promise<{ error: Error | null }> {
+  async getCurrentUser(): Promise<AuthUser | null> {
+    if (this.currentSession) {
+      return this.currentSession.user;
+    }
+
+    const { data: { user } } = await this.supabase.auth.getUser();
+    
+    if (!user) {
+      return null;
+    }
+
+    const profile = await this.fetchUserProfile(user.id);
+    return this.mapToAuthUser(user, profile);
+  }
+
+  /**
+   * Demande de réinitialisation de mot de passe
+   */
+  async requestPasswordReset(request: PasswordResetRequest): Promise<AuthResult> {
     try {
-      const { error } = await this.client.auth.resetPasswordForEmail(email);
+      const { error } = await this.supabase.auth.resetPasswordForEmail(
+        request.email,
+        {
+          redirectTo: "https://vision-dpe.fr/reset-password",
+        }
+      );
+
       if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'RESET_ERROR');
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
       }
-      return { error: null };
-    } catch (err) {
+
       return {
-        error: err instanceof Error ? err : new Error('Erreur de réinitialisation')
+        success: true,
+        data: undefined,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: this.mapAuthError(error),
       };
     }
   }
@@ -148,133 +372,77 @@ export class AuthService {
   /**
    * Mise à jour du mot de passe
    */
-  async updatePassword(newPassword: string): Promise<{ error: Error | null }> {
+  async updatePassword(update: PasswordUpdate): Promise<AuthResult> {
     try {
-      const { error } = await this.client.auth.updateUser({
-        password: newPassword
+      // Vérifie d'abord le mot de passe actuel
+      const currentUser = await this.getCurrentUser();
+      if (!currentUser) {
+        return {
+          success: false,
+          error: { code: "not_authenticated", message: "Utilisateur non connecté" },
+        };
+      }
+
+      // Met à jour le mot de passe
+      const { error } = await this.supabase.auth.updateUser({
+        password: update.newPassword,
       });
+
       if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'UPDATE_ERROR');
+        return {
+          success: false,
+          error: this.mapAuthError(error),
+        };
       }
-      return { error: null };
-    } catch (err) {
+
       return {
-        error: err instanceof Error ? err : new Error('Erreur de mise à jour')
+        success: true,
+        data: undefined,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: this.mapAuthError(error),
       };
     }
   }
 
   /**
-   * Récupération de la session courante
+   * Vérifie si l'utilisateur est authentifié
    */
-  async getSession(): Promise<{ user: User | null; error: Error | null }> {
-    try {
-      const { data, error } = await this.client.auth.getSession();
-      
-      if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'SESSION_ERROR');
-      }
-
-      if (!data.session?.user) {
-        return { user: null, error: null };
-      }
-
-      return {
-        user: this.mapSupabaseUser(data.session.user),
-        error: null
-      };
-    } catch (err) {
-      return {
-        user: null,
-        error: err instanceof Error ? err : new Error('Erreur de récupération session')
-      };
-    }
+  isAuthenticated(): boolean {
+    return this.currentSession !== null;
   }
 
   /**
-   * Récupération de l'utilisateur courant
+   * Écoute les changements d'état d'authentification
    */
-  async getCurrentUser(): Promise<{ user: User | null; error: Error | null }> {
-    try {
-      const { data, error } = await this.client.auth.getUser();
-      
-      if (error) {
-        throw new AuthError(error.message, error.status?.toString() || 'USER_ERROR');
-      }
-
-      if (!data.user) {
-        return { user: null, error: null };
-      }
-
-      return {
-        user: this.mapSupabaseUser(data.user),
-        error: null
-      };
-    } catch (err) {
-      return {
-        user: null,
-        error: err instanceof Error ? err : new Error('Erreur de récupération utilisateur')
-      };
-    }
-  }
-
-  /**
-   * Écoute des changements d'état d'authentification
-   */
-  onAuthStateChange(callback: (event: string, user: User | null) => void): () => void {
-    const { data } = this.client.auth.onAuthStateChange((event, session) => {
-      callback(event, session?.user ? this.mapSupabaseUser(session.user) : null);
-    });
+  onAuthStateChange(callback: (user: AuthUser | null) => void): () => void {
+    this.authStateCallbacks.push(callback);
     
-    return () => data.subscription.unsubscribe();
-  }
-
-  /**
-   * Vérification si l'utilisateur a un rôle spécifique
-   */
-  hasRole(user: User, requiredRole: UserRole): boolean {
-    const roleHierarchy: Record<UserRole, number> = {
-      admin: 3,
-      diagnosticien: 2,
-      assistant: 1,
-      viewer: 0
-    };
-
-    const userRole = user.user_metadata.role || 'viewer';
-    return roleHierarchy[userRole as UserRole] >= roleHierarchy[requiredRole];
-  }
-
-  /**
-   * Mapping d'un utilisateur Supabase vers notre type User
-   */
-  private mapSupabaseUser(supabaseUser: SupabaseUser): User {
-    const metadata = supabaseUser.user_metadata as {
-      full_name?: string;
-      role?: UserRole;
-      siret?: string;
-      adresse_pro?: string;
-      telephone?: string;
-    } | undefined;
-
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || '',
-      user_metadata: {
-        full_name: metadata?.full_name,
-        role: metadata?.role || 'viewer',
-        siret: metadata?.siret,
-        adresse_pro: metadata?.adresse_pro,
-        telephone: metadata?.telephone
-      },
-      created_at: supabaseUser.created_at,
-      last_sign_in_at: supabaseUser.last_sign_in_at
+    // Retourne une fonction pour se désabonner
+    return () => {
+      const index = this.authStateCallbacks.indexOf(callback);
+      if (index > -1) {
+        this.authStateCallbacks.splice(index, 1);
+      }
     };
   }
+}
 
-  /**
-   * Accès au client Supabase (pour les requêtes directes si nécessaire)
-   */
-  getClient(): SupabaseClient {
-    return this.client;
+// Export singleton factory
+let authServiceInstance: AuthService | null = null;
+
+export function createAuthService(
+  supabaseUrl: string,
+  supabaseKey: string
+): AuthService {
+  if (!authServiceInstance) {
+    authServiceInstance = new AuthService(supabaseUrl, supabaseKey);
   }
+  return authServiceInstance;
+}
+
+export function getAuthService(): AuthService | null {
+  return authServiceInstance;
 }
