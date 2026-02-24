@@ -1,0 +1,317 @@
+openapi: 3.0.0
+info:
+  title: API Contrôle de Cohérence DPE / Audit
+  description: >
+    API REST permettant la validation, la traduction et le contrôle de cohérence
+    des fichiers XML relatifs aux Diagnostics de Performance Énergétique (DPE)
+    et aux Audits énergétiques.
+  version: "1.24.0"
+
+paths:
+  /:
+    get:
+      summary: Page d’accueil du service
+      responses:
+        '200':
+          description: Message de bienvenue
+
+  /controle_coherence:
+    post:
+      summary: Contrôle de cohérence d’un DPE
+      description: Lance la procédure de validation et de cohérence sur un fichier XML DPE.
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+              example: "<dpe>...</dpe>"
+            example: {
+              'erreur_logiciel': [
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_uw_id:343\navec les données connexes suivantes :\n{'enum_type_baie_id': [4], 'type_baie': 'Fenêtres battantes', 'enum_type_materiaux_menuiserie_id': [5], 'type_materiaux_menuiserie': 'PVC', 'ug': 2.4, 'uw': 2.4}\net l'énumérateur enum_type_materiaux_menuiserie_id:{3: 'Bois'}.\nLa valeur attendue de l'énumérateur enum_type_materiaux_menuiserie_id doit être une des suivantes:\n{5: 'PVC'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_uw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_uw_id:397\navec les données connexes suivantes :\n{'enum_type_baie_id': [5], 'type_baie': 'Fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [5], 'type_materiaux_menuiserie': 'PVC', 'ug': 3.8, 'uw': 3.6}\net l'énumérateur enum_type_baie_id:{8: 'Portes-fenêtres battantes avec soubassement'}.\nLa valeur attendue de l'énumérateur enum_type_baie_id doit être une des suivantes:\n{5: 'Fenêtres coulissantes'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_baie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_uw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_uw_id:397\navec les données connexes suivantes :\n{'enum_type_baie_id': [5], 'type_baie': 'Fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [5], 'type_materiaux_menuiserie': 'PVC', 'ug': 3.8, 'uw': 3.6}\net l'énumérateur enum_type_materiaux_menuiserie_id:{3: 'Bois'}.\nLa valeur attendue de l'énumérateur enum_type_materiaux_menuiserie_id doit être une des suivantes:\n{5: 'PVC'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_materiaux_menuiserie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_uw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:83\navec les données connexes suivantes :\n{'enum_type_baie_id': [6], 'type_baie': 'Portes-fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [7], 'type_materiaux_menuiserie': 'Métal sans rupture de pont thermique', 'enum_type_pose_id': [1], 'type_pose': 'Nu Extérieur', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.51}\net l'énumérateur enum_type_baie_id:{4: 'Fenêtres battantes'}.\nLa valeur attendue de l'énumérateur enum_type_baie_id doit être une des suivantes:\n{6: 'Portes-fenêtres coulissantes'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_baie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:83\navec les données connexes suivantes :\n{'enum_type_baie_id': [6], 'type_baie': 'Portes-fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [7], 'type_materiaux_menuiserie': 'Métal sans rupture de pont thermique', 'enum_type_pose_id': [1], 'type_pose': 'Nu Extérieur', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.51}\net l'énumérateur enum_type_materiaux_menuiserie_id:{3: 'Bois'}.\nLa valeur attendue de l'énumérateur enum_type_materiaux_menuiserie_id doit être une des suivantes:\n{7: 'Métal sans rupture de pont thermique'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_materiaux_menuiserie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:83\navec les données connexes suivantes :\n{'enum_type_baie_id': [6], 'type_baie': 'Portes-fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [7], 'type_materiaux_menuiserie': 'Métal sans rupture de pont thermique', 'enum_type_pose_id': [1], 'type_pose': 'Nu Extérieur', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.51}\net l'énumérateur enum_type_pose_id:{2: 'Nu intérieur'}.\nLa valeur attendue de l'énumérateur enum_type_pose_id doit être une des suivantes:\n{1: 'Nu Extérieur'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_pose_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:83\navec les données connexes suivantes :\n{'enum_type_baie_id': [6], 'type_baie': 'Portes-fenêtres coulissantes', 'enum_type_materiaux_menuiserie_id': [7], 'type_materiaux_menuiserie': 'Métal sans rupture de pont thermique', 'enum_type_pose_id': [1], 'type_pose': 'Nu Extérieur', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.51}\net l'énumérateur enum_type_vitrage_id:{1: 'Simple vitrage'}.\nLa valeur attendue de l'énumérateur enum_type_vitrage_id doit être une des suivantes:\n{3: 'Triple vitrage'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_type_vitrage_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:93\navec les données connexes suivantes :\n{'enum_type_baie_id': [4], 'type_baie': 'Fenêtres battantes', 'enum_type_materiaux_menuiserie_id': [3, 4], 'type_materiaux_menuiserie': 'Bois / Bois-métal', 'enum_type_pose_id': [2, 3], 'type_pose': 'Nu Intérieur ou Tunnel', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.37}\net l'énumérateur enum_type_baie_id:{8: 'Portes-fenêtres battantes avec soubassement'}.\nLa valeur attendue de l'énumérateur enum_type_baie_id doit être une des suivantes:\n{4: 'Fenêtres battantes'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_baie_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_sw_id:93\navec les données connexes suivantes :\n{'enum_type_baie_id': [4], 'type_baie': 'Fenêtres battantes', 'enum_type_materiaux_menuiserie_id': [3, 4], 'type_materiaux_menuiserie': 'Bois / Bois-métal', 'enum_type_pose_id': [2, 3], 'type_pose': 'Nu Intérieur ou Tunnel', 'vitrage_vir': 1.0, 'enum_type_vitrage_id': [3], 'type_vitrage': 'Triple vitrage', 'sw': 0.37}\net l'énumérateur enum_type_vitrage_id:{1: 'Simple vitrage'}.\nLa valeur attendue de l'énumérateur enum_type_vitrage_id doit être une des suivantes:\n{3: 'Triple vitrage'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_type_vitrage_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_sw_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_coef_masque_proche_id:9\navec les données connexes suivantes :\n{'type_masque_proche': 'Baie en fond de balcon ou fond et flanc de loggias', 'avancee': '< 1', 'enum_orientation_id': [3, 4], 'orientation': 'Est ou Ouest', 'fe1': 0.45}\net l'énumérateur enum_orientation_id:{1: 'Sud'}.\nLa valeur attendue de l'énumérateur enum_orientation_id doit être une des suivantes:\n{3: 'Est', 4: 'Ouest'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/enum_orientation_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_coef_masque_proche_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_coef_masque_proche_id:9\navec les données connexes suivantes :\n{'type_masque_proche': 'Baie en fond de balcon ou fond et flanc de loggias', 'avancee': '< 1', 'enum_orientation_id': [3, 4], 'orientation': 'Est ou Ouest', 'fe1': 0.45}\net l'énumérateur enum_orientation_id:{1: 'Sud'}.\nLa valeur attendue de l'énumérateur enum_orientation_id doit être une des suivantes:\n{3: 'Est', 4: 'Ouest'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/enum_orientation_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_coef_masque_proche_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_pertes_stockage_id:3\navec les données connexes suivantes :\n{'enum_type_generateur_ecs_id': [70], 'type_generateur_ecs': 'Ballon électrique à accumulation vertical Catégorie B ou 2 étoiles', 'volume_ballon': '≤ 100', 'cr': 0.27}\net l'énumérateur enum_type_generateur_ecs_id:{71: 'Ballon électrique à accumulation vertical Catégorie C ou 3 étoiles'}.\nLa valeur attendue de l'énumérateur enum_type_generateur_ecs_id doit être une des suivantes:\n{70: 'Ballon électrique à accumulation vertical Catégorie B ou 2 étoiles'}\n",
+                  'objets_concerne': [ '/dpe/logement/installation_ecs_collection/installation_ecs/generateur_ecs_collection/generateur_ecs/donnee_entree/enum_type_generateur_ecs_id',
+                                       '/dpe/logement/installation_ecs_collection/installation_ecs/generateur_ecs_collection/generateur_ecs/donnee_entree/tv_pertes_stockage_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_rendement_generation_id:1\navec les données connexes suivantes :\n{'enum_type_generateur_ch_id': [20], 'type_generateur_ch': 'Cuisinière installé avant 1990 ', 'rg': 0.5}\net l'énumérateur enum_type_generateur_ch_id:{101: 'Autres émetteurs à effet joule'}.\nLa valeur attendue de l'énumérateur enum_type_generateur_ch_id doit être une des suivantes:\n{20: 'Cuisinière installé avant 1990 '}\n",
+                  'objets_concerne': [ '/dpe/logement/installation_chauffage_collection/installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/enum_type_generateur_ch_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/tv_rendement_generation_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_intermittence_id:63\navec les données connexes suivantes :\n{'enum_methode_application_dpe_log_id': [1], 'configuration_chauffage': 'maison individuelle chauffage individuel', 'enum_type_chauffage_id': [1], 'type_chauffage': 'Chauffage Divisé', 'enum_equipement_intermittence_id': [2], 'equipement_intermittence': 'Central sans minimum de température', 'enum_type_regulation_id': [2], 'type_regulation': 'avec régulation pièce par pièce', 'enum_type_emission_distribution_id': [5], 'type_emission_simple': 'Air soufflé', 'inertie': 'lourde ou très lourde', 'i0': 0.85}\net l'énumérateur enum_methode_application_dpe_log_id:{2: 'dpe appartement individuel chauffage individuel ecs individuel'}.\nLa valeur attendue de l'énumérateur enum_methode_application_dpe_log_id doit être une des suivantes:\n{1: 'dpe maison individuelle'}\n",
+                  'objets_concerne': [ '/dpe/logement/caracteristique_generale/enum_methode_application_dpe_log_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree/tv_intermittence_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nmauvaise correspondance entre la valeur tv_intermittence_id:63\navec les données connexes suivantes :\n{'enum_methode_application_dpe_log_id': [1], 'configuration_chauffage': 'maison individuelle chauffage individuel', 'enum_type_chauffage_id': [1], 'type_chauffage': 'Chauffage Divisé', 'enum_equipement_intermittence_id': [2], 'equipement_intermittence': 'Central sans minimum de température', 'enum_type_regulation_id': [2], 'type_regulation': 'avec régulation pièce par pièce', 'enum_type_emission_distribution_id': [5], 'type_emission_simple': 'Air soufflé', 'inertie': 'lourde ou très lourde', 'i0': 0.85}\net l'énumérateur enum_equipement_intermittence_id:{4: 'Par pièce avec minimum de température'}.\nLa valeur attendue de l'énumérateur enum_equipement_intermittence_id doit être une des suivantes:\n{2: 'Central sans minimum de température'}\n",
+                  'objets_concerne': [ '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree/enum_equipement_intermittence_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree/tv_intermittence_id' ],
+                  'thematique': 'mauvaise correspondance enum avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': "\nles champs suivants ne doivent pas être renseignés :\ntv_umur_id\nlorsque la variable enum_methode_saisie_u_id vaut : \n{1: 'non isolé'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree',
+                                       '/dpe/logement/enveloppe/mur_collection/mur[1]/donnee_entree/enum_methode_saisie_u_id' ],
+                  'thematique': 'element interdit présent dans le modèle de données' },
+                { 'importance': 'bloquant',
+                  'message': "\nles champs suivants ne doivent pas être renseignés :\ntv_umur_id\nlorsque la variable enum_methode_saisie_u_id vaut : \n{1: 'non isolé'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree',
+                                       '/dpe/logement/enveloppe/mur_collection/mur[2]/donnee_entree/enum_methode_saisie_u_id' ],
+                  'thematique': 'element interdit présent dans le modèle de données' },
+                { 'importance': 'bloquant',
+                  'message': "\nles champs suivants ne doivent pas être renseignés :\ntv_umur_id\nlorsque la variable enum_methode_saisie_u_id vaut : \n{1: 'non isolé'}\n",
+                  'objets_concerne': [ '/dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree',
+                                       '/dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/enum_methode_saisie_u_id' ],
+                  'thematique': 'element interdit présent dans le modèle de données' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de b ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.35\nvaleur table : 0.4 \ntv_coef_reduction_deperdition_id : 94\n',
+                  'objets_concerne': [ '/dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree/tv_coef_reduction_deperdition_id',
+                                       '/dpe/logement/enveloppe/mur_collection/mur[3]/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de b ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.45\nvaleur table : 0.8 \ntv_coef_reduction_deperdition_id : 73\n',
+                  'objets_concerne': [ '/dpe/logement/enveloppe/porte_collection/porte/donnee_entree/tv_coef_reduction_deperdition_id',
+                                       '/dpe/logement/enveloppe/porte_collection/porte/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de sw ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.48\nvaleur table : 0.37 \ntv_sw_id : 93\n',
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_sw_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de fe1 ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.3\nvaleur table : 0.45 \ntv_coef_masque_proche_id : 9\n',
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree/tv_coef_masque_proche_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[1]/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de fe1 ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.3\nvaleur table : 0.45 \ntv_coef_masque_proche_id : 9\n',
+                  'objets_concerne': [ '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree/tv_coef_masque_proche_id',
+                                       '/dpe/logement/enveloppe/baie_vitree_collection/baie_vitree[2]/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de rendement_generation ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 1\nvaleur table : 0.5 \ntv_rendement_generation_id : 1\n',
+                  'objets_concerne': [ '/dpe/logement/installation_chauffage_collection/installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree/tv_rendement_generation_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/generateur_chauffage_collection/generateur_chauffage/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de rendement_regulation ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.9\nvaleur table : 0.96 \ntv_rendement_regulation_id : 3\n',
+                  'objets_concerne': [ '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree/tv_rendement_regulation_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' },
+                { 'importance': 'bloquant',
+                  'message': '\nla valeur de i0 ne correspond pas à la valeur attendue de \nla table de valeur :\n\nvaleur : 0.9\nvaleur table : 0.85 \ntv_intermittence_id : 63\n',
+                  'objets_concerne': [ '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree/tv_intermittence_id',
+                                       '/dpe/logement/installation_chauffage_collection/installation_chauffage/emetteur_chauffage_collection/emetteur_chauffage/donnee_entree' ],
+                  'thematique': 'mauvaise correspondance valeur avec table de valeur' } ],
+              'erreur_saisie': [ ],
+              'message_principal': "CONTROLE COHERENCE EFFECTUE SUR DPE LOGEMENT EXISTANT. IL EXISTE DES ERREURS BLOQUANTES EMPECHANT LA SOUMISSION DU DPE A L'OBSERVATOIRE.",
+              'notification': [ ],
+              'validation_xsd': { 'error_log': [ '' ], 'valid': True },
+              'warning_logiciel': [ ],
+              'warning_saisie': [ ] }
+      responses:
+        '200':
+          description: Résultat du contrôle de cohérence DPE
+          content:
+            application/json: {}
+        '400':
+          description: XML invalide ou manquant
+        '500':
+          description: Erreur interne du moteur
+
+  /controle_coherence_test_1_janvier_2026:
+    post:
+      summary: Contrôle de cohérence DPE avec PEF électricité 1.9
+      description: Permet de tester le moteur de cohérence en appliquant le nouveau facteur de conversion (PEF = 1.9).
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Résultat du contrôle simulé (PEF = 1.9)
+
+  /controle_coherence_audit:
+    post:
+      summary: Contrôle de cohérence d’un Audit énergétique
+      description: Lance la procédure de validation et de cohérence sur un fichier XML Audit.
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+              example: "<audit>...</audit>"
+      responses:
+        '200':
+          description: Résultat du contrôle de cohérence Audit
+          content:
+            application/json: {}
+        '400':
+          description: XML invalide ou manquant
+        '500':
+          description: Erreur interne du moteur
+
+  /controle_coherence_audit_test_1_janvier_2026:
+    post:
+      summary: Contrôle de cohérence Audit avec PEF électricité 1.9
+      description: Permet de tester le moteur de cohérence pour les audits avec le nouveau facteur de conversion.
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Résultat du contrôle simulé (PEF = 1.9)
+
+  /health:
+    get:
+      summary: Vérifie la disponibilité du service
+      responses:
+        '200':
+          description: Statut du service
+          content:
+            application/json:
+              example:
+                msg:
+                  status: "up"
+
+  /version:
+    get:
+      summary: Retourne les versions du moteur, XSD et du service
+      responses:
+        '200':
+          description: Versions du service et du moteur de cohérence
+          content:
+            application/json:
+              example:
+                msg:
+                  os_version: "Debian 12"
+                  xsd_dpe_version: "2.6"
+                  xsd_version_audit: "2.5"
+                  svc_controle_coherence: "1.24.0"
+                  controle_coherence_dpe_version: "1.24.0"
+                  controle_coherence_audit_version: "1.13.0"
+                  global_version: "2.0.0"
+
+components:
+  schemas:
+    erreur_warning_content:
+      properties:
+        message:
+          description: message d'erreur ou de warning
+          type: string
+        thematique:
+          description: thematique de l'erreur ou warning
+          type: string
+        importance:
+          description: niveau de l'importance du warning ou de l'erreur
+          type: string
+        objets_concerne:
+          description: objets concernés par le warning (xpaths)
+          type: array
+          items:
+            type: string
+    controle_coherence_response:
+      properties:
+        validation_xsd:
+          description: resultat de la validation XSD du xml fourni
+          type: object
+          properties:
+            valid:
+              type: boolean
+              description: est ce que le xml est validé avec le XSD ou non
+            error_log:
+              type: array
+              description: log d'erreur de la validation XSD.
+              items:
+                type: string
+                description: log d'erreur individuel.
+        erreur_logiciel:
+          description: liste des erreurs de type erreurs logiciels
+          type: array
+          items:
+            $ref: "#/components/schemas/erreur_warning_content"
+        erreur_saisie:
+          description: liste des erreurs de type erreurs saise diagnostiqueur
+          type: array
+          items:
+            $ref: "#/components/schemas/erreur_warning_content"
+        warning_logiciel:
+          description: liste des warning de type warning logiciels
+          type: array
+          items:
+            $ref: "#/components/schemas/erreur_warning_content"
+        warning_saisie:
+          description: liste des warning de type warning saisie diagnostiqueur
+          type: array
+          items:
+            $ref: "#/components/schemas/erreur_warning_content"
+        notification:
+          description: liste des notifications qui ne sont ni des warnings ou erreurs.
+          type: array
+          items:
+            $ref: "#/components/schemas/erreur_warning_content"
+        message_principal:
+          description:  message principal retourné par le controle de cohérence. Signale des éventuelles érreurs.
+          type: string
+
