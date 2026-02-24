@@ -7,9 +7,6 @@ import {
   DPEDocument,
   ValidationResult,
   ValidationError,
-  CoherenceConstraint,
-  REQUIRED_FIELDS_BY_STEP,
-  COHERENCE_CONSTRAINTS,
   EnumPeriodeConstruction,
   EnumZoneClimatique,
   EnumMethodeApplicationDpeLog,
@@ -398,10 +395,10 @@ export class ValidationService {
         this.validateBaiesVitrees(document, errors, warnings);
         break;
       case 5: // Planchers bas
-        this.validatePlanchersBas(document, errors, warnings);
+        this.validatePlanchersBas(document, errors);
         break;
       case 6: // Planchers haut
-        this.validatePlanchersHaut(document, errors, warnings);
+        this.validatePlanchersHaut(document, errors);
         break;
     }
 
@@ -474,7 +471,7 @@ export class ValidationService {
     }
   }
 
-  private validatePlanchersBas(document: DPEDocument, errors: ValidationError[], warnings: ValidationError[]): void {
+  private validatePlanchersBas(document: DPEDocument, errors: ValidationError[]): void {
     const planchers = document.logement?.enveloppe?.plancher_bas_collection?.plancher_bas;
     if (!planchers) return;
 
@@ -494,7 +491,7 @@ export class ValidationService {
     }
   }
 
-  private validatePlanchersHaut(document: DPEDocument, errors: ValidationError[], warnings: ValidationError[]): void {
+  private validatePlanchersHaut(document: DPEDocument, errors: ValidationError[]): void {
     const planchers = document.logement?.enveloppe?.plancher_haut_collection?.plancher_haut;
     if (!planchers) return;
 

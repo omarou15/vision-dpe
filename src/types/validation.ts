@@ -3,10 +3,6 @@
  * Règles de cohérence et contraintes métier
  */
 
-import {
-  EnumPeriodeConstruction,
-} from "./dpe";
-
 // ============================================================================
 // RÈGLES DE VALIDATION
 // ============================================================================
@@ -49,6 +45,7 @@ export const REQUIRED_FIELDS_BY_STEP: Record<number, string[]> = {
 export interface CoherenceConstraint {
   id: string;
   description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   check: (data: any) => boolean;
   message: string;
   severity: "error" | "warning";
@@ -83,6 +80,7 @@ export const COHERENCE_CONSTRAINTS: CoherenceConstraint[] = [
     check: (data) => {
       const surfaceHabitable = data.caracteristiques_generales?.surface_habitable || 0;
       const surfaceBaies = data.enveloppe?.baies_vitrees?.reduce(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (sum: number, b: any) => sum + (b.surface || 0), 0
       ) || 0;
       return surfaceBaies <= surfaceHabitable * 1.5; // Tolérance pour plusieurs façades

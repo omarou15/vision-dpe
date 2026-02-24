@@ -4,7 +4,27 @@
  */
 
 import { supabase } from '../lib/supabase';
-import { User, UserCredentials, UserProfile, AuthError } from '../types/auth';
+import type { User } from '../types/auth';
+
+// ============================================================================
+// TYPES LOCAUX
+// ============================================================================
+
+export interface AuthError {
+  code: string;
+  message: string;
+}
+
+export interface UserProfile {
+  fullName: string;
+  company?: string;
+  siret?: string;
+  numeroDpeDiagnostiqueur?: string;
+  phone?: string;
+  adressePro?: string;
+  codePostalPro?: string;
+  communePro?: string;
+}
 
 // ============================================================================
 // TYPES
@@ -27,8 +47,12 @@ export interface SignInData {
 
 export interface AuthResult {
   success: boolean;
-  user?: User;
+  user?: UserWithProfile;
   error?: AuthError;
+}
+
+export interface UserWithProfile extends User {
+  profile: UserProfile;
 }
 
 export interface ProfileUpdateData {
@@ -48,7 +72,7 @@ export interface ProfileUpdateData {
 
 export class AuthService {
   private static instance: AuthService;
-  private currentUser: User | null = null;
+  private currentUser: UserWithProfile | null = null;
 
   private constructor() {}
 
@@ -110,7 +134,7 @@ export class AuthService {
       this.currentUser = await this.buildUser(authData.user.id);
       return { success: true, user: this.currentUser };
 
-    } catch (error) {
+    } catch {
       return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Erreur inconnue' } };
     }
   }
@@ -137,7 +161,7 @@ export class AuthService {
       this.currentUser = await this.buildUser(authData.user.id);
       return { success: true, user: this.currentUser };
 
-    } catch (error) {
+    } catch {
       return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Erreur inconnue' } };
     }
   }
@@ -153,7 +177,7 @@ export class AuthService {
   /**
    * Récupérer l'utilisateur courant
    */
-  async getCurrentUser(): Promise<User | null> {
+  async getCurrentUser(): Promise<UserWithProfile | null> {
     if (this.currentUser) {
       return this.currentUser;
     }
@@ -210,7 +234,7 @@ export class AuthService {
       this.currentUser = await this.buildUser(user.id);
       return { success: true, user: this.currentUser };
 
-    } catch (error) {
+    } catch {
       return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Erreur inconnue' } };
     }
   }
@@ -241,7 +265,7 @@ export class AuthService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Erreur inconnue' } };
     }
   }
@@ -265,7 +289,7 @@ export class AuthService {
       }
 
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Erreur inconnue' } };
     }
   }
@@ -274,7 +298,7 @@ export class AuthService {
   // MÉTHODES PRIVÉES
   // ============================================================================
 
-  private async buildUser(userId: string): Promise<User> {
+  private async buildUser(userId: string): Promise<UserWithProfile> {
     const { data: profile, error } = await supabase
       .from('users_profiles')
       .select('*')

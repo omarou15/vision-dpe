@@ -21,12 +21,14 @@ export const ADEME_ENDPOINTS = {
 // ============================================================================
 
 export interface ControleCoherenceRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dpe_data: Record<string, any>;
   version: "2.6";
   type_dpe: "existant" | "neuf" | "tertiaire";
 }
 
 export interface TraductionXMLRequest {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dpe_data: Record<string, any>;
   version: "2.6";
   format: "standard" | "complet";

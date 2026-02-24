@@ -7,12 +7,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { parseString } from 'xml2js';
 
-// Types DPE importés
-import {
+// Types DPE importés - eslint-disable car c'est un script de validation
+import type {
+  // Ces types sont importés pour validation statique, pas pour runtime
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   DPEDocument,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   EnumPeriodeConstruction,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   EnumEtiquetteDpe,
 } from '../src/types';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+interface ParsedXML { [key: string]: any }
 
 interface ValidationResult {
   valid: boolean;
@@ -47,7 +54,7 @@ async function validateXMLAgainstTypes(xmlPath: string): Promise<ValidationResul
     const xmlContent = fs.readFileSync(xmlPath, 'utf-8');
     
     // Parser le XML
-    const parsed = await new Promise<any>((resolve, reject) => {
+    const parsed = await new Promise<ParsedXML>((resolve, reject) => {
       parseString(xmlContent, { explicitArray: false }, (err, result) => {
         if (err) reject(err);
         else resolve(result);

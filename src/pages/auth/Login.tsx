@@ -41,7 +41,7 @@ export function Login() {
       })
       
       navigate('/dashboard')
-    } catch (error) {
+    } catch {
       toast({
         title: 'Erreur de connexion',
         description: 'Email ou mot de passe incorrect',

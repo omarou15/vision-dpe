@@ -343,7 +343,8 @@ export interface InstallationChauffageCollection {
 }
 
 export interface InstallationChauffage {
-  // À compléter selon XSD
+  // TODO: À compléter selon XSD ADEME
+  id?: string;
 }
 
 export interface InstallationECSCollection {
@@ -351,11 +352,13 @@ export interface InstallationECSCollection {
 }
 
 export interface InstallationECS {
-  // À compléter selon XSD
+  // TODO: À compléter selon XSD ADEME
+  id?: string;
 }
 
 export interface Ventilation {
-  // À compléter selon XSD
+  // TODO: À compléter selon XSD ADEME
+  id?: string;
 }
 
 // ============================================================================

@@ -3,7 +3,7 @@
  * Conforme au format XSD ADEME v2.6
  */
 
-import { DPEDocument, XMLExportOptions, XMLValidationResult, EnumVersionDpe } from '../types';
+import { DPEDocument, XMLExportOptions, XMLValidationResult } from '../types';
 import { XMLBuilder } from 'fast-xml-parser';
 
 // ============================================================================
@@ -62,10 +62,11 @@ export class XMLGeneratorService {
   /**
    * Génère le XML complet d'un DPE
    */
-  generateXML(document: DPEDocument, options: XMLExportOptions = { include_validation: true, format: 'standard' }): XMLGenerationResult {
+  generateXML(document: DPEDocument, options?: XMLExportOptions): XMLGenerationResult {
+    const opts = options ?? { include_validation: true, format: 'standard' };
     try {
       // Validation préalable
-      if (options.include_validation) {
+      if (opts.include_validation) {
         const validationResult = this.validateDocumentStructure(document);
         if (!validationResult.valid) {
           return {
@@ -76,7 +77,7 @@ export class XMLGeneratorService {
       }
 
       // Construction de l'objet XML
-      const xmlObject = this.buildXMLObject(document, options);
+      const xmlObject = this.buildXMLObject(document);
 
       // Génération XML
       const xmlContent = this.xmlBuilder.build(xmlObject);
@@ -208,7 +209,7 @@ export class XMLGeneratorService {
   // CONSTRUCTION DES NŒUDS XML
   // ============================================================================
 
-  private buildXMLObject(document: DPEDocument, options: XMLExportOptions): unknown {
+  private buildXMLObject(document: DPEDocument): unknown {
     const xmlObject: Record<string, unknown> = {
       '@_version': document.version || '8.0.4',
       '@_xmlns': XSD_NAMESPACE,
