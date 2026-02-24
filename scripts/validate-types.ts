@@ -10,14 +10,7 @@ import { parseString } from 'xml2js';
 // Types DPE importés
 import {
   DPEDocument,
-  EnumTypeBatiment,
   EnumPeriodeConstruction,
-  EnumTypeParoi,
-  EnumTypeVitrage,
-  EnumTypeMenuiserie,
-  EnumTypeVmc,
-  EnumTypeGenerateurChauffage,
-  EnumTypeGenerateurEcs,
   EnumEtiquetteDpe,
 } from '../src/types';
 

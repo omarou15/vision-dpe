@@ -359,22 +359,6 @@ export interface Ventilation {
 }
 
 // ============================================================================
-// TYPES POUR VALIDATION
-// ============================================================================
-
-export interface ValidationError {
-  field: string;
-  message: string;
-  code: string;
-}
-
-export interface ValidationResult {
-  valid: boolean;
-  errors: ValidationError[];
-  warnings: ValidationError[];
-}
-
-// ============================================================================
 // TYPES POUR XML
 // ============================================================================
 

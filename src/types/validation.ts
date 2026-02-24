@@ -4,14 +4,7 @@
  */
 
 import {
-  EnumTypeBatiment,
   EnumPeriodeConstruction,
-  EnumTypeParoi,
-  EnumTypeVitrage,
-  EnumTypeMenuiserie,
-  EnumTypeVmc,
-  EnumTypeGenerateurChauffage,
-  EnumTypeGenerateurEcs,
 } from "./dpe";
 
 // ============================================================================
