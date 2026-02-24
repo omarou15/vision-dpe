@@ -3,23 +3,13 @@
 # dependencies
 node_modules/
 
-# Expo
-.expo/
+# Vite
 dist/
-web-build/
-expo-env.d.ts
+dist-ssr/
+*.local
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
+# PWA
+dev-dist/
 
 # debug
 npm-debug.*
@@ -32,10 +22,20 @@ yarn-error.*
 
 # local env files
 .env*.local
+.env
 
 # typescript
 *.tsbuildinfo
 
-# generated native folders
-/ios
-/android
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Temporary files
+*.log
+.cache/
