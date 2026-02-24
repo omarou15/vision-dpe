@@ -4,6 +4,7 @@
 [![React Native](https://img.shields.io/badge/React%20Native-0.73-blue)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-SDK%2050-black)](https://expo.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)](https://supabase.io/)
 
 Application mobile de Diagnostic de Performance Énergétique (DPE) certifiée par l'ADEME.
 
@@ -13,38 +14,32 @@ Application mobile de Diagnostic de Performance Énergétique (DPE) certifiée p
 |-------|-------------|--------|------------|
 | 🔧 0.1 | Setup projet Expo + React Native | ✅ Fait | 100% |
 | 🔧 0.2 | Générer types TypeScript depuis XSD | ✅ Fait | 100% |
-| 🔧 0.3 | Schema Supabase + migrations | ⏳ À faire | 0% |
+| 🔧 0.3 | Schema Supabase + migrations | ✅ Fait | 100% |
 | 🔧 0.4 | Setup CI/CD GitHub Actions + EAS | ✅ Fait | 100% |
 | 🔧 0.5 | Maquettes Figma complètes | ⏳ À faire | 0% |
 
-**Phase 0 globale: 60%** ✅
+**Phase 0 globale: 80%** ✅
 
-## 📦 Types Générés
+## 📦 Livrables Phase 0
 
-```typescript
-/src/types/
-├── dpe.ts              # Types principaux DPE (enums, interfaces)
-├── tables-valeurs.ts   # Tables ADEME (coefficients U, facteurs)
-├── validation.ts       # Règles de validation
-├── api-ademe.ts        # Types API ADEME
-└── index.ts            # Export centralisé
-```
+### Types TypeScript (`/src/types/`)
+- `dpe.ts` - Enums et interfaces principaux DPE
+- `tables-valeurs.ts` - Coefficients U, facteurs conversion, seuils étiquettes
+- `validation.ts` - Règles de cohérence et validation
+- `api-ademe.ts` - Types API ADEME
+- `index.ts` - Export centralisé
 
-### Enums disponibles
-- `EnumTypeBatiment` - Maison / Appartement
-- `EnumPeriodeConstruction` - Périodes de construction
-- `EnumTypeParoi` - Types de parois
-- `EnumTypeVitrage` - Simple / Double / Triple vitrage
-- `EnumTypeVmc` - Types de ventilation
-- `EnumTypeGenerateurChauffage` - Chaudières, PAC, poêles...
-- `EnumEtiquetteDpe` - A à G
+### Database Schema (`/supabase/migrations/`)
+- `users_profiles` - Profils diagnostiqueurs
+- `dpe_drafts` - Brouillons DPE (13 étapes)
+- `dpe_documents` - DPE validés
+- `dpe_validations` - Historique validations
+- `enum_cache` - Cache enums/tables ADEME
+- `dpe_attachments` - Pièces jointes
 
-### Interfaces principales
-- `DPEDocument` - Document DPE complet
-- `CaracteristiquesGenerales` - Type, surface, période
-- `Enveloppe` - Murs, baies, planchers, PT
-- `Installations` - Chauffage, ECS, ventilation
-- `Resultats` - Consommations, émissions, étiquettes
+### CI/CD (`/.github/workflows/`)
+- `ci.yml` - Lint, type-check, test
+- `eas-build.yml` - Build EAS Android/iOS
 
 ## 📱 Stack Technique
 
@@ -54,7 +49,7 @@ Application mobile de Diagnostic de Performance Énergétique (DPE) certifiée p
 | **Langage** | TypeScript |
 | **UI** | React Native Paper |
 | **Navigation** | React Navigation |
-| **Backend** | Supabase (PostgreSQL, Auth) |
+| **Backend** | Supabase (PostgreSQL, Auth, Storage) |
 | **CI/CD** | GitHub Actions + EAS |
 
 ## 🚀 Démarrage
@@ -86,18 +81,23 @@ npm start
 └── /store         # State management
 
 /supabase
-├── /migrations    # Migrations SQL
-└── seed.sql       # Données initiales
+├── /migrations    # Migrations SQL ✅
+└── seed.sql       # Données initiales ✅
 
 /.github
-└── /workflows     # CI/CD GitHub Actions
+└── /workflows     # CI/CD GitHub Actions ✅
+
+/docs
+├── Cahier_des_Charges.md  # CDC VISION
+├── database-schema.md     # Schema SQL
+└── technical.md           # Documentation technique
 ```
 
 ## 📋 Phases de Développement
 
 | Phase | Description | Semaines | Status |
 |-------|-------------|----------|--------|
-| 🔧 Phase 0 | Fondations | 2 | 🚧 En cours (60%) |
+| 🔧 Phase 0 | Fondations | 2 | 🚧 En cours (80%) |
 | 📋 Phase 1 | Administratif | 1 | ⏳ À faire |
 | 🏠 Phase 2 | Enveloppe | 3 | ⏳ À faire |
 | ⚡ Phase 3 | Installations | 3 | ⏳ À faire |
