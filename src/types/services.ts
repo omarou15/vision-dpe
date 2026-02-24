@@ -4,7 +4,7 @@
  */
 
 import { ValidationResult, ValidationError } from "./validation";
-import { DPEDocument, XMLExportOptions, XMLValidationResult } from "./dpe";
+import { DPEDocument, XMLValidationResult } from "./dpe";
 
 // ============================================================================
 // AUTH SERVICE
