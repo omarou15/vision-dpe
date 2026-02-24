@@ -1,99 +1,104 @@
 /**
  * Types DPE - Diagnostic de Performance Énergétique
  * Basé sur la méthode 3CL et XSD ADEME v2.6
+ * CORRIGÉ après validation contre XML ADEME réel
  */
 
 // ============================================================================
 // ENUMS ADEME
 // ============================================================================
 
-export enum EnumTypeBatiment {
-  MAISON = "maison",
-  APPARTEMENT = "appartement",
+export enum EnumModeleDpe {
+  LOGEMENT_EXISTANT = 1,
+  LOGEMENT_NEUF = 2,
+  TERTIAIRE = 3,
+}
+
+export enum EnumVersionDpe {
+  V1 = "1",
+  V1_1 = "1.1",
+  V2 = "2",
+  V2_1 = "2.1",
+  V2_2 = "2.2",
+  V2_3 = "2.3",
+  V2_4 = "2.4",
+  V2_5 = "2.5",
+  V2_6 = "2.6",
 }
 
 export enum EnumPeriodeConstruction {
-  AVANT_1948 = "avant_1948",
-  PERIODE_1948_1974 = "1948_1974",
-  PERIODE_1975_1977 = "1975_1977",
-  PERIODE_1978_1982 = "1978_1982",
-  PERIODE_1983_1988 = "1983_1988",
-  PERIODE_1989_1999 = "1989_1999",
-  PERIODE_2000_2005 = "2000_2005",
-  PERIODE_2006_2012 = "2006_2012",
-  PERIODE_2013_2021 = "2013_2021",
-  APRES_2021 = "apres_2021",
+  AVANT_1948 = 1,
+  PERIODE_1948_1974 = 2,
+  PERIODE_1975_1977 = 3,
+  PERIODE_1978_1982 = 4,
+  PERIODE_1983_1988 = 5,
+  PERIODE_1989_2000 = 6,
+  PERIODE_2001_2005 = 7,
+  PERIODE_2006_2012 = 8,
+  PERIODE_2013_2021 = 9,
+  APRES_2021 = 10,
 }
 
-export enum EnumTypeParoi {
-  MUR_DONNANT_SUR_EXTERIEUR = "mur_donnant_sur_exterieur",
-  MUR_DONNANT_SUR_LOCAL_NON_CHAUFFE = "mur_donnant_sur_local_non_chauffe",
-  MUR_DONNANT_SUR_LOCAL_CHAUFFE = "mur_donnant_sur_local_chauffe",
-  PLANCHER_BAS_DONNANT_SUR_EXTERIEUR = "plancher_bas_donnant_sur_exterieur",
-  PLANCHER_BAS_DONNANT_SUR_LOCAL_NON_CHAUFFE = "plancher_bas_donnant_sur_local_non_chauffe",
-  PLANCHER_HAUT_DONNANT_SUR_EXTERIEUR = "plancher_haut_donnant_sur_exterieur",
-  PLANCHER_HAUT_DONNANT_SUR_LOCAL_NON_CHAUFFE = "plancher_haut_donnant_sur_local_non_chauffe",
+export enum EnumMethodeApplicationDpeLog {
+  MAISON_INDIVIDUELLE = 1,
+  APPARTEMENT_CHAUFFAGE_ECS_INDIVIDUEL = 2,
+  APPARTEMENT_CHAUFFAGE_COLLECTIF_ECS_INDIVIDUEL = 3,
+  APPARTEMENT_CHAUFFAGE_INDIVIDUEL_ECS_COLLECTIF = 4,
+  APPARTEMENT_CHAUFFAGE_COLLECTIF_ECS_COLLECTIF = 5,
+  IMMEUBLE_CHAUFFAGE_INDIVIDUEL_ECS_INDIVIDUEL = 6,
+  IMMEUBLE_CHAUFFAGE_COLLECTIF_ECS_INDIVIDUEL = 7,
+  IMMEUBLE_CHAUFFAGE_INDIVIDUEL_ECS_COLLECTIF = 8,
+  IMMEUBLE_CHAUFFAGE_COLLECTIF_ECS_COLLECTIF = 9,
 }
 
-export enum EnumMateriauParoi {
-  BETON = "beton",
-  BRIQUE = "brique",
-  PARPAING = "parpaing",
-  BOIS = "bois",
-  PIERRE = "pierre",
-  TERRE = "terre",
-  AUTRE = "autre",
+export enum EnumZoneClimatique {
+  H1A = 1,
+  H1B = 2,
+  H1C = 3,
+  H2A = 4,
+  H2B = 5,
+  H2C = 6,
+  H2D = 7,
+  H3 = 8,
 }
 
-export enum EnumTypeVitrage {
-  SIMPLE_VITRAGE = "simple_vitrage",
-  DOUBLE_VITRAGE = "double_vitrage",
-  TRIPLE_VITRAGE = "triple_vitrage",
+export enum EnumClasseAltitude {
+  INF_400M = 1,
+  ENTRE_400_800M = 2,
+  SUP_800M = 3,
 }
 
-export enum EnumTypeMenuiserie {
-  PVC = "pvc",
-  BOIS = "bois",
-  ALUMINIUM = "aluminium",
-  ACIER = "acier",
-  MIXTE = "mixte",
+export enum EnumTypeAdjacence {
+  EXTERIEUR = 1,
+  PAROI_ENTERREE = 2,
+  VIDE_SANITAIRE = 3,
+  LOCAL_AUTRE_USAGE = 4,
+  TERRE_PLEIN = 5,
+  SOUS_SOL_NON_CHAUFFE = 6,
+  LOCAL_NON_CHAUFFE_NON_ACCESSIBLE = 7,
+  GARAGE = 8,
+  CELLIER = 9,
+  ESPACE_TAMPON_SOLARISE = 10,
+  COMBLE_FORTEMENT_VENTILE = 11,
+  COMBLE_FAIBLEMENT_VENTILE = 12,
+  COMBLE_TRES_FAIBLEMENT_VENTILE = 13,
+  CIRCULATION_SANS_OUVERTURE = 14,
+  CIRCULATION_AVEC_OUVERTURE = 15,
+  CIRCULATION_DESENFUMAGE = 16,
+  HALL_FERMETURE_AUTO = 17,
+  HALL_SANS_FERMETURE_AUTO = 18,
+  GARAGE_PRIVE_COLLECTIF = 19,
+  LOCAL_TERTIAIRE = 20,
+  AUTRES_DEPENDANCES = 21,
+  LOCAL_NON_DEPERDITIF = 22,
 }
 
-export enum EnumTypeVmc {
-  VMC_AUTOREGLABLE = "vmc_autoreglable",
-  VMC_HYGROREGLABLE_B = "vmc_hygroreglable_b",
-  VMC_HYGROREGLABLE_A = "vmc_hygroreglable_a",
-  VMC_DOUBLE_FLUX = "vmc_double_flux",
-  VMC_SIMPLE_FLUX_HYGROREGLABLE = "vmc_simple_flux_hygroreglable",
-  VMC_SIMPLE_FLUX_AUTOREGLABLE = "vmc_simple_flux_autoreglable",
-}
-
-export enum EnumTypeGenerateurChauffage {
-  CHAUDIERE_GAZ = "chaudiere_gaz",
-  CHAUDIERE_FIOUL = "chaudiere_fioul",
-  CHAUDIERE_ELECTRIQUE = "chaudiere_electrique",
-  CHAUDIERE_BOIS = "chaudiere_bois",
-  POMPE_A_CHALEUR_AIR_AIR = "pac_air_air",
-  POMPE_A_CHALEUR_AIR_EAU = "pac_air_eau",
-  POMPE_A_CHALEUR_EAU_EAU = "pac_eau_eau",
-  POELE_BOIS = "poele_bois",
-  POELE_GRANULES = "poele_granules",
-  RADIATEUR_ELECTRIQUE = "radiateur_electrique",
-  RADIATEUR_INERTIE = "radiateur_inertie",
-  PLANCHER_CHAUFFANT_ELECTRIQUE = "plancher_chauffant_electrique",
-  PLANCHER_CHAUFFANT_HYDRAULIQUE = "plancher_chauffant_hydraulique",
-}
-
-export enum EnumTypeGenerateurEcs {
-  CHAUDIERE_GAZ = "chaudiere_gaz",
-  CHAUDIERE_FIOUL = "chaudiere_fioul",
-  CHAUDIERE_ELECTRIQUE = "chaudiere_electrique",
-  CHAUDIERE_BOIS = "chaudiere_bois",
-  POMPE_A_CHALEUR = "pac",
-  CHAUFFE_EAU_ELECTRIQUE = "chauffe_eau_electrique",
-  CHAUFFE_EAU_SOLAIRE = "chauffe_eau_solaire",
-  CHAUFFE_EAU_GAZ = "chauffe_eau_gaz",
-  CUMULUS = "cumulus",
+export enum EnumOrientation {
+  SUD = 1,
+  NORD = 2,
+  EST = 3,
+  OUEST = 4,
+  HORIZONTAL = 5,
 }
 
 export enum EnumEtiquetteDpe {
@@ -107,209 +112,250 @@ export enum EnumEtiquetteDpe {
 }
 
 // ============================================================================
-// INTERFACES PRINCIPALES
+// INTERFACES PRINCIPALES - CORRIGÉES
 // ============================================================================
 
 export interface DPEDocument {
-  id: string;
-  numero_dpe: string;
-  date_visite: string;
-  date_etablissement: string;
+  // Attributs
+  version: string; // "8.0.4"
   
-  // Administratif
+  // Sections principales
   administratif: Administratif;
-  
-  // Caractéristiques générales
-  caracteristiques_generales: CaracteristiquesGenerales;
-  
-  // Enveloppe
-  enveloppe: Enveloppe;
-  
-  // Installations
-  installations: Installations;
-  
-  // Résultats
-  resultats: Resultats;
+  logement: Logement;
 }
 
 export interface Administratif {
-  proprietaire: {
-    nom: string;
-    prenom: string;
-    adresse: string;
-    code_postal: string;
-    commune: string;
-  };
-  adresse_logement: {
-    adresse: string;
-    code_postal: string;
-    commune: string;
-    batiment: string;
-    escalier: string;
-    etage: string;
-    porte: string;
-  };
+  date_visite_diagnostiqueur: string; // ISO date
+  date_etablissement_dpe: string; // ISO date
+  nom_proprietaire: string;
+  nom_proprietaire_installation_commune?: string;
+  enum_modele_dpe_id: EnumModeleDpe;
+  enum_version_id: EnumVersionDpe;
+  diagnostiqueur: Diagnostiqueur;
+  geolocalisation: Geolocalisation;
 }
 
-export interface CaracteristiquesGenerales {
-  type_batiment: EnumTypeBatiment;
-  periode_construction: EnumPeriodeConstruction;
-  surface_habitable: number; // m²
-  nombre_niveaux: number;
-  hauteur_sous_plafond: number; // m
+export interface Diagnostiqueur {
+  usr_logiciel_id: number;
+  version_logiciel: string;
+  nom_diagnostiqueur: string;
+  prenom_diagnostiqueur: string;
+  mail_diagnostiqueur: string;
+  telephone_diagnostiqueur: string;
+  adresse_diagnostiqueur: string;
+  entreprise_diagnostiqueur: string;
+  numero_certification_diagnostiqueur: string;
+  organisme_certificateur: string;
+}
+
+export interface Geolocalisation {
+  numero_fiscal_local?: string;
+  idpar?: string;
+  immatriculation_copropriete?: string;
+  adresses: Adresses;
+}
+
+export interface Adresses {
+  adresse_proprietaire: AdresseDetail;
+  adresse_bien: AdresseDetail;
+  adresse_proprietaire_installation_commune?: AdresseDetail;
+}
+
+export interface AdresseDetail {
+  adresse_brut: string;
+  code_postal_brut: string;
+  nom_commune_brut: string;
+  label_brut: string;
+  label_brut_avec_complement: string;
+  enum_statut_geocodage_ban_id: number;
+  ban_date_appel: string;
+  compl_nom_residence?: string;
+  compl_ref_batiment?: string;
+  compl_etage_appartement?: string;
+  compl_ref_cage_escalier?: string;
+  compl_ref_logement?: string;
+  ban_id: string;
+  ban_label: string;
+  ban_housenumber: string;
+  ban_street: string;
+  ban_citycode: string;
+  ban_postcode: string;
+  ban_city: string;
+  ban_type: string;
+  ban_score: number;
+  ban_x: number;
+  ban_y: number;
+}
+
+export interface Logement {
+  caracteristique_generale: CaracteristiqueGenerale;
+  meteo: Meteo;
+  enveloppe: Enveloppe;
+  installation_chauffage_collection?: InstallationChauffageCollection;
+  installation_ecs_collection?: InstallationECSCollection;
+  ventilation: Ventilation;
+}
+
+export interface CaracteristiqueGenerale {
+  annee_construction: number;
+  enum_periode_construction_id: EnumPeriodeConstruction;
+  enum_methode_application_dpe_log_id: EnumMethodeApplicationDpeLog;
+  surface_habitable_logement: number;
+  nombre_niveau_immeuble: number;
+  nombre_niveau_logement: number;
+  hsp: number; // Hauteur sous plafond
+}
+
+export interface Meteo {
+  enum_zone_climatique_id: EnumZoneClimatique;
+  enum_classe_altitude_id: EnumClasseAltitude;
+  batiment_materiaux_anciens: number; // 0 ou 1
 }
 
 export interface Enveloppe {
-  murs: Mur[];
-  baies_vitrees: BaieVitree[];
-  planchers_bas: Plancher[];
-  planchers_hauts: Plancher[];
-  ponts_thermiques: PontThermique[];
+  inertie: Inertie;
+  mur_collection: MurCollection;
+  baie_vitree_collection: BaieVitreeCollection;
+  plancher_bas_collection: PlancherBasCollection;
+  plancher_haut_collection: PlancherHautCollection;
+}
+
+export interface Inertie {
+  inertie_plancher_bas_lourd: number; // 0 ou 1
+  inertie_plancher_haut_lourd: number; // 0 ou 1
+  inertie_paroi_verticale_lourd: number; // 0 ou 1
+  enum_classe_inertie_id: number; // 1-4
+}
+
+export interface MurCollection {
+  mur: Mur | Mur[];
 }
 
 export interface Mur {
-  id: string;
-  type_paroi: EnumTypeParoi;
-  materiau: EnumMateriauParoi;
-  epaisseur: number; // cm
-  surface: number; // m²
-  isolation: {
-    presence: boolean;
-    epaisseur?: number; // cm
-    materiau?: string;
-    lambda?: number; // W/(m·K)
-  };
-  coefficient_u: number; // W/(m²·K)
-  orientation: string; // Nord, Sud, Est, Ouest
+  donnee_entree: MurDonneeEntree;
+  donnee_intermediaire: MurDonneeIntermediaire;
+}
+
+export interface MurDonneeEntree {
+  reference: string;
+  description?: string;
+  tv_coef_reduction_deperdition_id?: number;
+  enum_type_adjacence_id: EnumTypeAdjacence;
+  enum_orientation_id: EnumOrientation;
+  surface_paroi_totale?: number;
+  surface_paroi_opaque: number;
+  paroi_lourde: number; // 0 ou 1
+  tv_umur0_id?: number;
+  tv_umur_id?: number;
+  epaisseur_structure?: number;
+  enum_materiaux_structure_mur_id?: number;
+  enum_methode_saisie_u0_id?: number;
+  enum_type_doublage_id?: number;
+  paroi_ancienne: number; // 0 ou 1
+  enum_type_isolation_id: number;
+  enum_methode_saisie_u_id: number;
+}
+
+export interface MurDonneeIntermediaire {
+  b: number; // Coefficient de réduction
+  umur: number; // Coefficient U
+  umur0?: number; // Coefficient U non isolé
+}
+
+export interface BaieVitreeCollection {
+  baie_vitree: BaieVitree | BaieVitree[];
 }
 
 export interface BaieVitree {
-  id: string;
-  type_menuiserie: EnumTypeMenuiserie;
-  type_vitrage: EnumTypeVitrage;
-  surface: number; // m²
-  largeur: number; // m
-  hauteur: number; // m
-  orientation: string;
-  coefficient_uw: number; // W/(m²·K)
-  facteur_solaire_sw: number;
-  presence_masque_proche: boolean;
-  presence_masque_lointain: boolean;
+  donnee_entree: BaieVitreeDonneeEntree;
+  donnee_intermediaire?: BaieVitreeDonneeIntermediaire;
 }
 
-export interface Plancher {
-  id: string;
-  type_paroi: EnumTypeParoi;
-  surface: number; // m²
-  isolation: {
-    presence: boolean;
-    epaisseur?: number;
-    materiau?: string;
-    lambda?: number;
-  };
-  coefficient_u: number;
+export interface BaieVitreeDonneeEntree {
+  reference: string;
+  description?: string;
+  reference_paroi?: string;
+  enum_type_adjacence_id: EnumTypeAdjacence;
+  enum_orientation_id: EnumOrientation;
+  surface_totale_baie: number;
 }
 
-export interface PontThermique {
-  id: string;
-  type_liaison: string;
-  longueur: number; // m
-  coefficient_psi: number; // W/(m·K)
+export interface BaieVitreeDonneeIntermediaire {
+  sw: number; // Facteur solaire
+  ubat: number;
 }
 
-export interface Installations {
-  ventilation: Ventilation;
-  chauffage: Chauffage;
-  ecs: ECS;
-  climatisation?: Climatisation;
-  production_enr?: ProductionENR;
+export interface PlancherBasCollection {
+  plancher_bas: PlancherBas | PlancherBas[];
+}
+
+export interface PlancherBas {
+  donnee_entree: PlancherBasDonneeEntree;
+  donnee_intermediaire: PlancherBasDonneeIntermediaire;
+}
+
+export interface PlancherBasDonneeEntree {
+  reference: string;
+  description?: string;
+  enum_type_adjacence_id: EnumTypeAdjacence;
+  surface_paroi_opaque: number;
+  paroi_lourde: number;
+  tv_upb0_id?: number;
+  tv_upb_id?: number;
+  enum_type_isolation_id: number;
+  enum_methode_saisie_u_id: number;
+}
+
+export interface PlancherBasDonneeIntermediaire {
+  b: number;
+  upb: number;
+  upb_final: number;
+}
+
+export interface PlancherHautCollection {
+  plancher_haut: PlancherHaut | PlancherHaut[];
+}
+
+export interface PlancherHaut {
+  donnee_entree: PlancherHautDonneeEntree;
+  donnee_intermediaire: PlancherHautDonneeIntermediaire;
+}
+
+export interface PlancherHautDonneeEntree {
+  reference: string;
+  description?: string;
+  enum_type_adjacence_id: EnumTypeAdjacence;
+  surface_paroi_opaque: number;
+  paroi_lourde: number;
+  tv_uph0_id?: number;
+  tv_uph_id?: number;
+  enum_type_isolation_id: number;
+  enum_methode_saisie_u_id: number;
+}
+
+export interface PlancherHautDonneeIntermediaire {
+  b: number;
+  uph: number;
+}
+
+export interface InstallationChauffageCollection {
+  installation_chauffage: InstallationChauffage | InstallationChauffage[];
+}
+
+export interface InstallationChauffage {
+  // À compléter selon XSD
+}
+
+export interface InstallationECSCollection {
+  installation_ecs: InstallationECS | InstallationECS[];
+}
+
+export interface InstallationECS {
+  // À compléter selon XSD
 }
 
 export interface Ventilation {
-  type_ventilation: EnumTypeVmc;
-  annee_installation: number;
-  debit_ventilation: number; // m³/h
-  presence_regulation_hygro: boolean;
-  q4pa: number; // m³/(h·m²)
-}
-
-export interface Chauffage {
-  generateurs: GenerateurChauffage[];
-  emetteurs: EmetteurChauffage[];
-  distribution: DistributionChauffage;
-}
-
-export interface GenerateurChauffage {
-  id: string;
-  type: EnumTypeGenerateurChauffage;
-  annee_installation: number;
-  puissance_nominale: number; // kW
-  rendement: number;
-  localisation: string;
-}
-
-export interface EmetteurChauffage {
-  id: string;
-  type: string; // radiateur, plancher chauffant, etc.
-  surface: number; // m²
-  localisation: string;
-}
-
-export interface DistributionChauffage {
-  type: string; // eau chaude, air, électrique
-  longueur: number; // m
-  isolation: boolean;
-}
-
-export interface ECS {
-  generateurs: GenerateurECS[];
-  stockage: StockageECS;
-}
-
-export interface GenerateurECS {
-  id: string;
-  type: EnumTypeGenerateurEcs;
-  annee_installation: number;
-  puissance_nominale: number; // kW
-}
-
-export interface StockageECS {
-  volume: number; // litres
-  isolation_epaisseur: number; // mm
-}
-
-export interface Climatisation {
-  surface_climatisee: number; // m²
-  generateurs: GenerateurClimatisation[];
-}
-
-export interface GenerateurClimatisation {
-  id: string;
-  type: string; // split, pac réversible, etc.
-  seer: number; // Seasonal Energy Efficiency Ratio
-  puissance_nominale: number; // kW
-}
-
-export interface ProductionENR {
-  photovoltaique?: InstallationPhotovoltaique;
-}
-
-export interface InstallationPhotovoltaique {
-  surface: number; // m²
-  puissance_crete: number; // kWc
-  orientation: string;
-  inclinaison: number; // degrés
-}
-
-export interface Resultats {
-  consommation_energie_primaire: number; // kWh/m².an
-  consommation_energie_finale: number; // kWh/m².an
-  emission_ges: number; // kgCO2/m².an
-  cout_chauffage: number; // €/an
-  cout_ecs: number; // €/an
-  cout_total: number; // €/an
-  etiquette_energie: EnumEtiquetteDpe;
-  etiquette_climat: EnumEtiquetteDpe;
+  // À compléter selon XSD
 }
 
 // ============================================================================
