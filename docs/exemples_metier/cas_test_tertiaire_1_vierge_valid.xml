@@ -1,0 +1,291 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dpe version="8.0.4">
+    <administratif>
+        <date_visite_diagnostiqueur>2021-07-10</date_visite_diagnostiqueur>
+        <date_etablissement_dpe>2021-07-10</date_etablissement_dpe>
+        <nom_proprietaire>commune de Champigny Sur Marne</nom_proprietaire>
+        <enum_modele_dpe_id>4</enum_modele_dpe_id>
+        <enum_version_id>2.6</enum_version_id>
+        <diagnostiqueur>
+            <usr_logiciel_id>3</usr_logiciel_id>
+            <version_logiciel>3.2</version_logiciel>
+            <nom_diagnostiqueur>Lamar</nom_diagnostiqueur>
+            <prenom_diagnostiqueur>Kendrick</prenom_diagnostiqueur>
+            <mail_diagnostiqueur>kendrick.lamar@diagnostiqueur.fr</mail_diagnostiqueur>
+            <telephone_diagnostiqueur>0607080910</telephone_diagnostiqueur>
+            <adresse_diagnostiqueur>20 avenue de Ségur 75007 Paris</adresse_diagnostiqueur>
+            <entreprise_diagnostiqueur>Entreprise Tartampion</entreprise_diagnostiqueur>
+            <numero_certification_diagnostiqueur>????????????</numero_certification_diagnostiqueur>
+            <organisme_certificateur>Organisme Certificateur</organisme_certificateur>
+        </diagnostiqueur>
+        <geolocalisation>
+            <numero_fiscal_local>2A0123456789</numero_fiscal_local>
+            <idpar>06163000CE8888</idpar>
+            <immatriculation_copropriete>AA1234567</immatriculation_copropriete>
+            <adresses>
+                <adresse_proprietaire>
+                    <adresse_brut>3 rue roland martin</adresse_brut>
+                    <code_postal_brut>94500</code_postal_brut>
+                    <nom_commune_brut>Champigny Sur Marne</nom_commune_brut>
+                    <label_brut>116 avenue de Rosny 93130 Noisy Le Sec</label_brut>
+                    <label_brut_avec_complement>logement A12 escalier A1 etage 0 batiment A residence lesl lilas 3 rue roland martin 94500 Champigny Sur Marne</label_brut_avec_complement>
+                    <enum_statut_geocodage_ban_id>1</enum_statut_geocodage_ban_id>
+                    <ban_date_appel>2021-07-10</ban_date_appel>
+                    <ban_id>94017_8243_00003</ban_id>
+                    <ban_label>3 Rue Roland Martin 94500 Champigny-sur-Marne</ban_label>
+                    <ban_housenumber>3</ban_housenumber>
+                    <ban_street>Rue Roland Martin</ban_street>
+                    <ban_citycode>94017</ban_citycode>
+                    <ban_postcode>94500</ban_postcode>
+                    <ban_city>Champigny-sur-Marne</ban_city>
+                    <ban_type>housenumber</ban_type>
+                    <ban_score>0.9665599999999999</ban_score>
+                    <ban_x>662242.87</ban_x>
+                    <ban_y>6857973.84</ban_y>
+                </adresse_proprietaire>
+                <adresse_bien>
+                    <adresse_brut>116 avenue de Rosny</adresse_brut>
+                    <code_postal_brut>93130</code_postal_brut>
+                    <nom_commune_brut>Noisy Le Sec</nom_commune_brut>
+                    <label_brut>116 avenue de Rosny 93130 Noisy Le Sec</label_brut>
+                    <label_brut_avec_complement>logement A12 escalier A1 etage 0 batiment A residence lesl lilas 3 rue roland martin 94500 Champigny Sur Marne</label_brut_avec_complement>
+                    <enum_statut_geocodage_ban_id>1</enum_statut_geocodage_ban_id>
+                    <ban_date_appel>2021-07-10</ban_date_appel>
+                    <ban_id>93053_8175_00116</ban_id>
+                    <ban_label>116 Avenue de Rosny 93130 Noisy-le-Sec</ban_label>
+                    <ban_housenumber>116</ban_housenumber>
+                    <ban_street>Avenue de Rosny</ban_street>
+                    <ban_citycode>93053</ban_citycode>
+                    <ban_postcode>93130</ban_postcode>
+                    <ban_city>Noisy-le-Sec</ban_city>
+                    <ban_type>housenumber</ban_type>
+                    <ban_score>0.9750781818181817</ban_score>
+                    <ban_x>661218.02</ban_x>
+                    <ban_y>6865892.53</ban_y>
+                </adresse_bien>
+            </adresses>
+        </geolocalisation>
+        <enum_consentement_formulaire_id>1</enum_consentement_formulaire_id>
+        <enum_commanditaire_id>1</enum_commanditaire_id>
+        <information_formulaire_consentement>
+            <nom_formulaire>Hubert Bonisseur de La Bath</nom_formulaire>
+            <personne_morale>1</personne_morale>
+            <siren_formulaire>111111111</siren_formulaire>
+            <mail>hubert.bonisseur.delabath@gmail.com</mail>
+            <telephone>0607080910</telephone>
+            <label_adresse>20 avenue de Ségur 75007 Paris</label_adresse>
+            <label_adresse_avec_complement>appartement 12 etage 25, 20 avenue de Ségur 75007 Paris
+            </label_adresse_avec_complement>
+        </information_formulaire_consentement>
+        <horodatage_historisation>2025-10-10T14:45:30+02:00</horodatage_historisation>
+    </administratif>
+    <tertiaire>
+        <caracteristique_generale>
+            <enum_usage_fonctionnel_batiment_id>22</enum_usage_fonctionnel_batiment_id>
+            <enum_categorie_erp_id>1</enum_categorie_erp_id>
+            <enum_methode_application_dpe_ter_id>3</enum_methode_application_dpe_ter_id>
+            <surface_utile>2500</surface_utile>
+            <shon>3250.0</shon>
+            <nombre_occupant>100</nombre_occupant>
+            <enum_periode_construction_id>3</enum_periode_construction_id>
+            <annee_construction>1976</annee_construction>
+        </caracteristique_generale>
+        <consommation_collection/>
+    </tertiaire>
+    <descriptif_enr_collection/>
+    <descriptif_simplifie_collection>
+        <descriptif_simplifie>
+            <description>mur sud en briques pleines doubles avec lame d'air non isolé; mur est en briques pleines
+                simples donnant sur une circulation
+            </description>
+            <enum_categorie_descriptif_simplifie_id>1</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>plancher intermédiaire non déperditif donnant sur un autre logement adjacent</description>
+            <enum_categorie_descriptif_simplifie_id>2</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>plancher intermédiaire non déperditif donnant sur un autre logement adjacent</description>
+            <enum_categorie_descriptif_simplifie_id>3</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>porte en bois pleine simple; Fenêtre battante bois simple vitrage orienté sud;Porte Fenêtre
+                bois simple vitrage orienté sud
+            </description>
+            <enum_categorie_descriptif_simplifie_id>4</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>convecteurs electriques anciens(système individuel)</description>
+            <enum_categorie_descriptif_simplifie_id>5</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>ballon éléctrique vertical 300L</description>
+            <enum_categorie_descriptif_simplifie_id>6</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>Sans Object</description>
+            <enum_categorie_descriptif_simplifie_id>7</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+        <descriptif_simplifie>
+            <description>ventilation naturelle par conduit</description>
+            <enum_categorie_descriptif_simplifie_id>8</enum_categorie_descriptif_simplifie_id>
+        </descriptif_simplifie>
+    </descriptif_simplifie_collection>
+    <fiche_technique_collection>
+        <fiche_technique>
+            <enum_categorie_fiche_technique_id>1</enum_categorie_fiche_technique_id>
+            <sous_fiche_technique_collection>
+                <sous_fiche_technique>
+                    <description>surface</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>80m²</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>type d'adjacence</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>extérieur</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>matériau mur</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>briques pleines doubles</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>état isolation</description>
+                    <enum_origine_donnee_id>3</enum_origine_donnee_id>
+                    <valeur>non isolé</valeur>
+                </sous_fiche_technique>
+            </sous_fiche_technique_collection>
+        </fiche_technique>
+        <fiche_technique>
+            <enum_categorie_fiche_technique_id>1</enum_categorie_fiche_technique_id>
+            <sous_fiche_technique_collection>
+                <sous_fiche_technique>
+                    <description>surface</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>51m²</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>type d'adjacence</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>extérieur</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>matériau mur</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>bloc de béton plein</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>état isolation</description>
+                    <enum_origine_donnee_id>3</enum_origine_donnee_id>
+                    <valeur>isolé (ITI)</valeur>
+                </sous_fiche_technique>
+            </sous_fiche_technique_collection>
+        </fiche_technique>
+        <fiche_technique>
+            <enum_categorie_fiche_technique_id>4</enum_categorie_fiche_technique_id>
+            <sous_fiche_technique_collection>
+                <sous_fiche_technique>
+                    <description>surface</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>5m²</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>type d'adjacence</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>extérieur</valeur>
+                </sous_fiche_technique>
+                <sous_fiche_technique>
+                    <description>type vitrage</description>
+                    <enum_origine_donnee_id>2</enum_origine_donnee_id>
+                    <valeur>Double vitrage</valeur>
+                </sous_fiche_technique>
+            </sous_fiche_technique_collection>
+        </fiche_technique>
+    </fiche_technique_collection>
+    <justificatif_collection>
+        <justificatif>
+            <description>notice technique du ballon d'eau chaude atlantic zeneo</description>
+            <enum_type_justificatif_id>10</enum_type_justificatif_id>
+        </justificatif>
+    </justificatif_collection>
+    <descriptif_geste_entretien_collection>
+        <descriptif_geste_entretien>
+            <enum_picto_geste_entretien_id>9</enum_picto_geste_entretien_id>
+            <description>detarter et vidanger le ballon d'eau chaude tous les 5 ans</description>
+            <categorie_geste_entretien>entretien du chauffe-eau</categorie_geste_entretien>
+        </descriptif_geste_entretien>
+    </descriptif_geste_entretien_collection>
+    <descriptif_travaux>
+        <commentaire_travaux>Des travaux peuvent vous permettre d’améliorer significativement l’efficacité énergétique
+            de votre
+            logement et ainsi de faire des économies d’énergie, d’améliorer son confort, de le valoriser et de le
+            rendre plus écologique. Le pack de travaux vous permet de réaliser les travaux prioritaires,
+            et le pack d’aller vers un logement très performant.
+        </commentaire_travaux>
+        <pack_travaux_collection>
+            <pack_travaux>
+                <enum_num_pack_travaux_id>1</enum_num_pack_travaux_id>
+                <conso_5_usages_apres_travaux>99</conso_5_usages_apres_travaux>
+                <cout_pack_travaux_min>999</cout_pack_travaux_min>
+                <cout_pack_travaux_max>9999</cout_pack_travaux_max>
+                <travaux_collection>
+                    <travaux>
+                        <enum_lot_travaux_id>1</enum_lot_travaux_id>
+                        <description_travaux>isolation murs ITE 15 cm</description_travaux>
+                        <avertissement_travaux>permis de construire</avertissement_travaux>
+                        <performance_recommande>R = 3,75 m2. K/W</performance_recommande>
+                    </travaux>
+                    <travaux>
+                        <enum_lot_travaux_id>4</enum_lot_travaux_id>
+                        <description_travaux>remplacement des vitrages par du double vitrage performant
+                        </description_travaux>
+                        <performance_recommande>U = 2.4 W/m²/K</performance_recommande>
+                    </travaux>
+                </travaux_collection>
+            </pack_travaux>
+            <pack_travaux>
+                <enum_num_pack_travaux_id>2</enum_num_pack_travaux_id>
+                <conso_5_usages_apres_travaux>99</conso_5_usages_apres_travaux>
+                <cout_pack_travaux_min>999</cout_pack_travaux_min>
+                <cout_pack_travaux_max>9999</cout_pack_travaux_max>
+                <travaux_collection>
+                    <travaux>
+                        <enum_lot_travaux_id>5</enum_lot_travaux_id>
+                        <description_travaux>remplacement du système de chauffage par une pompe à chaleur
+                        </description_travaux>
+                        <avertissement_travaux>permis de construire</avertissement_travaux>
+                        <performance_recommande>SCOP=4.2</performance_recommande>
+                    </travaux>
+                </travaux_collection>
+            </pack_travaux>
+            <pack_travaux>
+                <enum_num_pack_travaux_id>3</enum_num_pack_travaux_id>
+                <conso_5_usages_apres_travaux>99</conso_5_usages_apres_travaux>
+                <cout_pack_travaux_min>999</cout_pack_travaux_min>
+                <cout_pack_travaux_max>9999</cout_pack_travaux_max>
+                <travaux_collection>
+                    <travaux>
+                        <enum_lot_travaux_id>1</enum_lot_travaux_id>
+                        <description_travaux>isolation murs ITE 15 cm</description_travaux>
+                        <avertissement_travaux>permis de construire</avertissement_travaux>
+                        <performance_recommande>R = 3,75 m2. K/W</performance_recommande>
+                    </travaux>
+                    <travaux>
+                        <enum_lot_travaux_id>4</enum_lot_travaux_id>
+                        <description_travaux>remplacement des vitrages par du double vitrage performant
+                        </description_travaux>
+                        <performance_recommande>U = 2.4 W/m²/K</performance_recommande>
+                    </travaux>
+                    <travaux>
+                        <enum_lot_travaux_id>5</enum_lot_travaux_id>
+                        <description_travaux>remplacement du système de chauffage par une pompe à chaleur
+                        </description_travaux>
+                        <avertissement_travaux>permis de construire</avertissement_travaux>
+                        <performance_recommande>SCOP=4.2</performance_recommande>
+                    </travaux>
+                </travaux_collection>
+            </pack_travaux>
+        </pack_travaux_collection>
+    </descriptif_travaux>
+</dpe>
