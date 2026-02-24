@@ -1,0 +1,25 @@
+model_dpe :
+  version : 9.2.1
+  date : 2025-10-17
+  titre : DPE 2.6 - ajout de l'horodatage des XML
+model_audit:
+  version : 5.3.1
+  date : 2025-10-17
+  titre : audit 2.5 - ajout de l'horodatage des XML
+modele_commun:
+  version : dpe-9.2.1-audit-5.3.1
+  date: 2025-10-17
+  titre : DPE 2.6, audit 2.5 - ajout de l'horodatage des XML
+controle_coherence_dpe:
+  version : 1.24.2
+  date: 2025-11-03
+controle_coherence_audit:
+  version : 1.13.1
+  date: 2025-10-17
+svc_controle_coherence:
+  version : 3.2.1
+  date: 2025-10-10
+version_globale:
+  version: 1.12.3
+  date: 2026-01-23
+  titre: DPE 2.6, audit 2.5 - passage au PEF élec à 1,9
