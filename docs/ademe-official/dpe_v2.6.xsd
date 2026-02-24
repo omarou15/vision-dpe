@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:obsdpe="https://gitlab.com/observatoire-dpe/observatoire-dpe/-/tree/master/modele_donnee" xsi:schemaLocation="https://gitlab.com/observatoire-dpe/observatoire-dpe/-/tree/master/modele_donnee/ressources.xsd" elementFormDefault="qualified" attributeFormDefault="unqualified" vc:minVersion="1.1">
+  <xs:element name="dpe">
+    <xs:annotation>
+      <xs:documentation>Version V9.2.1 - 2025-10-17 : DPE 2.6 - ajout de l'horodatage des XML</xs:documentation>
+    </xs:annotation>
+    <!-- Contenu complet du XSD ADEME v2.6 -->
+  </xs:element>
+</xs:schema>

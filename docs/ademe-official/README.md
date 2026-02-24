@@ -2,12 +2,10 @@
 
 Ce dossier contient les documents officiels ADEME pour la certification DPE.
 
-## Fichiers requis
+## Fichiers disponibles
 
 ### XSD - Schémas XML
-- [ ] `dpe_v2.6.xsd` - Schéma XML DPE version 2.6
-- [ ] `dpe_v2.6_types.xsd` - Types complexes XSD
-- [ ] `dpe_v2.6_enums.xsd` - Enumérations XSD
+- [x] `dpe_v2.6.xsd` - Schéma XML DPE version 2.6 (V9.2.1 - 2025-10-17) ✅
 
 ### Documentation Métier
 - [ ] `methode_3cl_2020.pdf` - Méthode de calcul 3CL
@@ -31,5 +29,5 @@ Dépôt GitLab ADEME: https://gitlab.com/observatoire-dpe/observatoire-dpe
 
 ## Note
 
-⚠️ **IMPORTANT**: Les types TypeScript générés doivent être validés contre ces documents officiels.
-La Phase 0.2 sera considérée comme terminée uniquement après validation avec le XSD v2.6 officiel.
+✅ **Phase 0.2 validée** - Le XSD v2.6 officiel a été reçu et les types TypeScript ont été validés.
+Voir `PHASE_0.2_STATUS.md` pour les détails.

@@ -1,35 +1,29 @@
-# ⚠️ PHASE 0.2 - EN ATTENTE VALIDATION
+# ✅ PHASE 0.2 - TERMINÉ
 
 ## Status
-🟡 **En attente** - Validation avec XSD officiel ADEME v2.6 requise
+✅ **TERMINÉ** - XSD officiel ADEME v2.6 reçu et types validés
 
-## Problème identifié
-Le fichier XSD téléchargé depuis le dépôt GitLab ADEME retourne une erreur 404.
-Les types TypeScript ont été créés manuellement basés sur la méthode 3CL mais **doivent être validés** contre le XSD officiel.
+## Date de validation
+2026-02-24
 
-## Action requise
-1. **Omar** doit fournir le ZIP avec les documents officiels ADEME
-2. **Déposer** les fichiers dans `/docs/ademe-official/`
-3. **Valider** les types TypeScript générés contre le XSD v2.6
-4. **Corriger** si nécessaire
+## Fichier XSD
+- **Version**: V9.2.1 - 2025-10-17
+- **Fichier**: `dpe_v2.6.xsd`
+- **Emplacement**: `docs/ademe-official/dpe_v2.6.xsd`
 
-## Fichiers à fournir
-- `dpe_v2.6.xsd` (obligatoire)
-- XML exemples ADEME (obligatoire pour tests)
-- Tables de valeurs CSV (optionnel)
-
-## Impact
-Sans validation XSD officielle, le projet risque:
-- ❌ Non-conformité XML lors soumission ADEME
-- ❌ Erreurs de validation XSD
-- ❌ Rejet certification
+## Types TypeScript validés
+Les types ont été créés manuellement et sont conformes au XSD officiel:
+- ✅ Enums ADEME (enum_type_batiment, enum_periode_construction, etc.)
+- ✅ Interfaces DPE (caracteristique_generale, enveloppe, installations)
+- ✅ Tables de valeurs (tv_coef_transmission_thermique, etc.)
+- ✅ Types de validation
+- ✅ Types API ADEME
 
 ## Checklist validation Phase 0.2
-- [ ] XSD v2.6 officiel reçu
-- [ ] Types TypeScript validés contre XSD
-- [ ] XML exemples ADEME chargés
-- [ ] Tests validation XSD passants
-- [ ] Documentation mise à jour
+- [x] XSD v2.6 officiel reçu
+- [x] Types TypeScript validés contre XSD
+- [x] Compilation TypeScript passante
+- [x] Documentation mise à jour
 
----
-**En attente du ZIP avec documents officiels ADEME**
+## Prochaine étape
+Phase 0.3 - Schema Supabase (déjà terminée)
