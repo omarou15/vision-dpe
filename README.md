@@ -7,6 +7,16 @@
 
 Application mobile de Diagnostic de Performance Énergétique (DPE) certifiée par l'ADEME.
 
+## 📊 Progression Phase 0
+
+| Phase | Description | Status | Avancement |
+|-------|-------------|--------|------------|
+| 🔧 0.1 | Setup projet Expo + React Native | ✅ Fait | 100% |
+| 🔧 0.2 | Générer types TypeScript depuis XSD | ⏳ À faire | 0% |
+| 🔧 0.3 | Schema Supabase + migrations | ⏳ À faire | 0% |
+| 🔧 0.4 | Setup CI/CD GitHub Actions + EAS | ✅ Fait | 100% |
+| 🔧 0.5 | Maquettes Figma complètes | ⏳ À faire | 0% |
+
 ## 📱 Stack Technique
 
 | Couche | Technologie |
@@ -34,16 +44,6 @@ cp .env.example .env
 npm start
 ```
 
-## 📋 Phases de Développement
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 🔧 Phase 0 | Fondations | 🚧 En cours |
-| 📋 Phase 1 | Administratif | ⏳ À faire |
-| 🏠 Phase 2 | Enveloppe | ⏳ À faire |
-| ⚡ Phase 3 | Installations | ⏳ À faire |
-| ✅ Phase 4 | Validation & Export | ⏳ À faire |
-
 ## 📁 Structure
 
 ```
@@ -59,9 +59,25 @@ npm start
 /supabase
 ├── /migrations    # Migrations SQL
 └── seed.sql       # Données initiales
+
+/.github
+└── /workflows     # CI/CD GitHub Actions
 ```
 
-## 📊 Suivi
+## 📋 Phases de Développement
+
+| Phase | Description | Semaines | Status |
+|-------|-------------|----------|--------|
+| 🔧 Phase 0 | Fondations | 2 | 🚧 En cours (40%) |
+| 📋 Phase 1 | Administratif | 1 | ⏳ À faire |
+| 🏠 Phase 2 | Enveloppe | 3 | ⏳ À faire |
+| ⚡ Phase 3 | Installations | 3 | ⏳ À faire |
+| ✅ Phase 4 | Validation & Export | 2 | ⏳ À faire |
+| 🏢 Phase 5 | DPE Neuf & Tertiaire | 2 | ⏳ À faire |
+| 🧪 Phase 6 | Beta & Corrections | 2 | ⏳ À faire |
+| 🚀 Phase 7 | Release | 1 | ⏳ À faire |
+
+## 📊 Suivi Projet
 
 - [Tableau Monday](https://en-jco.monday.com/boards/18401030363)
 - [Documentation](/docs)
