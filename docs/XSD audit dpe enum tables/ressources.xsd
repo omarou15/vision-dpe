@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://gitlab.com/observatoire-dpe/observatoire-dpe/modele_donnee"
+           elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <xs:attribute name="model_usage">
+        <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="dpe"/>
+                  <xs:enumeration value="audit"/>
+                  <xs:enumeration value="common"/>
+                </xs:restriction>
+        </xs:simpleType>
+    </xs:attribute>
+</xs:schema>
