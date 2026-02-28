@@ -1,0 +1,167 @@
+{
+  "app": {
+    "name": "Vision DPE",
+    "description": "Energy Performance Diagnosis"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "newProject": "New project",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Log out",
+    "projects": "Projects"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Sign in",
+    "signupButton": "Create account",
+    "noAccount": "No account yet?",
+    "hasAccount": "Already have an account?",
+    "confirmPassword": "Confirm password",
+    "passwordMismatch": "Passwords do not match",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "accountCreated": "Account created",
+    "checkEmail": "Check your email to confirm your registration.",
+    "emailSent": "Email sent",
+    "resetEmailInfo": "If an account exists for this email, you will receive a reset link.",
+    "backToLogin": "Back to login",
+    "sendLink": "Send link"
+  },
+  "project": {
+    "type": {
+      "dpe": "DPE",
+      "audit": "Energy audit"
+    },
+    "status": {
+      "draft": "Draft",
+      "inProgress": "In progress",
+      "validated": "Validated",
+      "exported": "Exported",
+      "archived": "Archived"
+    },
+    "create": "New project",
+    "duplicate": "Duplicate",
+    "archive": "Archive",
+    "transformToAudit": "Convert to energy audit",
+    "transformConfirm": "Steps 1-11 will be preserved. Audit steps (12-20) will be added."
+  },
+  "wizard": {
+    "step": "Step",
+    "of": "of",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "steps": {
+      "dpe": {
+        "1": "Step 1",
+        "2": "Step 2",
+        "3": "Step 3",
+        "4": "Step 4",
+        "5": "Step 5",
+        "6": "Step 6",
+        "7": "Step 7",
+        "8": "Step 8",
+        "9": "Step 9",
+        "10": "Step 10",
+        "11": "Step 11",
+        "12": "Step 12",
+        "13": "Step 13",
+        "14": "Step 14"
+      },
+      "audit": {
+        "1": "Step 1",
+        "2": "Step 2",
+        "3": "Step 3",
+        "4": "Step 4",
+        "5": "Step 5",
+        "6": "Step 6",
+        "7": "Step 7",
+        "8": "Step 8",
+        "9": "Step 9",
+        "10": "Step 10",
+        "11": "Step 11",
+        "12": "Step 12",
+        "13": "Step 13",
+        "14": "Step 14",
+        "15": "Step 15",
+        "16": "Step 16",
+        "17": "Step 17",
+        "18": "Step 18",
+        "19": "Step 19",
+        "20": "Step 20"
+      }
+    },
+    "stepsAudit": {
+      "12": "Initial assessment",
+      "13": "Path 1 - Step A",
+      "14": "Path 1 - Steps B+",
+      "15": "Path 1 - Projected DPE",
+      "16": "Path 2 - Global renovation",
+      "17": "Path 2 - Projected DPE",
+      "18": "Economic analysis",
+      "19": "Audit validation",
+      "20": "Audit export"
+    },
+    "finish": "Finish"
+  },
+  "validation": {
+    "error": "Blocking error",
+    "warning": "Warning",
+    "success": "ADEME compliant",
+    "required": "Required field",
+    "disclaimer": "Indicative estimate — the final label will be calculated at validation."
+  },
+  "dpe": {
+    "label": {
+      "A": "A",
+      "B": "B",
+      "C": "C",
+      "D": "D",
+      "E": "E",
+      "F": "F",
+      "G": "G"
+    },
+    "energy": "Energy",
+    "climate": "Climate",
+    "consumption": "Consumption",
+    "emissions": "Emissions",
+    "before": "Before",
+    "after": "After",
+    "gain": "Gain",
+    "targetReached": "Target reached",
+    "targetNotReached": "Target not reached"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "add": "Add",
+    "remove": "Remove",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "noResults": "No results",
+    "offline": "Offline",
+    "online": "Online",
+    "syncing": "Syncing...",
+    "syncComplete": "Synced"
+  },
+  "invitation": {
+    "accepted": "Invitation accepted",
+    "createAccount": "Create your account to join the team.",
+    "invalid": "Invalid or expired invitation",
+    "missingToken": "Missing invitation token",
+    "verifying": "Verifying invitation...",
+    "viaInvite": "Signing up via invitation. Your organization is pre-configured.",
+    "missingOrg": "Missing invitation link. Ask your manager for an invitation."
+  },
+  "profile": {
+    "deactivated": "Account deactivated",
+    "deactivatedMsg": "Contact your manager to reactivate your access."
+  }
+}

@@ -3,7 +3,7 @@ import { Plus, FileText, Clock, CheckCircle, AlertCircle, TrendingUp, Building2 
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuthStore } from '../../store/authStore'
 
 // Mock data - will be replaced with IndexedDB data
 const mockRecentDPEs = [

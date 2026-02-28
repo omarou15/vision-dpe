@@ -1,0 +1,167 @@
+{
+  "app": {
+    "name": "Vision DPE",
+    "description": "Diagnostic de Performance Energétique"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "newProject": "Nouveau projet",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "logout": "Déconnexion",
+    "projects": "Projets"
+  },
+  "auth": {
+    "login": "Connexion",
+    "signup": "Créer un compte",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginButton": "Se connecter",
+    "signupButton": "Créer mon compte",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordMismatch": "Les mots de passe ne correspondent pas",
+    "passwordMinLength": "Le mot de passe doit contenir au moins 8 caractères",
+    "accountCreated": "Compte créé",
+    "checkEmail": "Vérifiez votre email pour confirmer votre inscription.",
+    "emailSent": "Email envoyé",
+    "resetEmailInfo": "Si un compte existe pour cet email, vous recevrez un lien de réinitialisation.",
+    "backToLogin": "Retour à la connexion",
+    "sendLink": "Envoyer le lien"
+  },
+  "project": {
+    "type": {
+      "dpe": "DPE",
+      "audit": "Audit énergétique"
+    },
+    "status": {
+      "draft": "Brouillon",
+      "inProgress": "En cours",
+      "validated": "Validé",
+      "exported": "Exporté",
+      "archived": "Archivé"
+    },
+    "create": "Nouveau projet",
+    "duplicate": "Dupliquer",
+    "archive": "Archiver",
+    "transformToAudit": "Passer en Audit énergétique",
+    "transformConfirm": "Les étapes 1 à 11 seront conservées. Les étapes audit (12-20) seront ajoutées."
+  },
+  "wizard": {
+    "step": "Étape",
+    "of": "sur",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "save": "Enregistrer",
+    "steps": {
+      "dpe": {
+        "1": "Informations générales",
+        "2": "Données administratives",
+        "3": "Caractéristiques générales",
+        "4": "Murs",
+        "5": "Baies, portes et ETS",
+        "6": "Planchers bas",
+        "7": "Planchers hauts",
+        "8": "Ponts thermiques",
+        "9": "Chauffage",
+        "10": "ECS",
+        "11": "Ventilation / Clim / ENR",
+        "12": "Scénarios de travaux",
+        "13": "Validation",
+        "14": "Export XML"
+      },
+      "audit": {
+        "1": "Informations générales",
+        "2": "Données administratives",
+        "3": "Caractéristiques générales",
+        "4": "Murs",
+        "5": "Baies, portes et ETS",
+        "6": "Planchers bas",
+        "7": "Planchers hauts",
+        "8": "Ponts thermiques",
+        "9": "Chauffage",
+        "10": "ECS",
+        "11": "Ventilation / Clim / ENR",
+        "12": "Bilan état initial",
+        "13": "Parcours 1 — Travaux étape 1",
+        "14": "Parcours 1 — Travaux étapes 2+",
+        "15": "Parcours 1 — DPE projeté",
+        "16": "Parcours 2 — Travaux globaux",
+        "17": "Parcours 2 — DPE projeté",
+        "18": "Analyse économique",
+        "19": "Validation audit",
+        "20": "Export XML audit"
+      }
+    },
+    "stepsAudit": {
+      "12": "Bilan état initial",
+      "13": "Parcours 1 - Étape A",
+      "14": "Parcours 1 - Étapes B+",
+      "15": "Parcours 1 - DPE projeté",
+      "16": "Parcours 2 - Travaux globaux",
+      "17": "Parcours 2 - DPE projeté",
+      "18": "Analyse économique",
+      "19": "Validation audit",
+      "20": "Export audit"
+    },
+    "finish": "Terminer"
+  },
+  "validation": {
+    "error": "Erreur bloquante",
+    "warning": "Avertissement",
+    "success": "Conforme ADEME",
+    "required": "Champ obligatoire",
+    "disclaimer": "Estimation indicative — l'étiquette définitive sera calculée à la validation."
+  },
+  "dpe": {
+    "label": {
+      "A": "A",
+      "B": "B",
+      "C": "C",
+      "D": "D",
+      "E": "E",
+      "F": "F",
+      "G": "G"
+    },
+    "energy": "Énergie",
+    "climate": "Climat",
+    "consumption": "Consommation",
+    "emissions": "Émissions",
+    "before": "Avant",
+    "after": "Après",
+    "gain": "Gain",
+    "targetReached": "Objectif atteint",
+    "targetNotReached": "Objectif non atteint"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "add": "Ajouter",
+    "remove": "Retirer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "noResults": "Aucun résultat",
+    "offline": "Hors ligne",
+    "online": "En ligne",
+    "syncing": "Synchronisation...",
+    "syncComplete": "Synchronisé"
+  },
+  "invitation": {
+    "accepted": "Invitation acceptée",
+    "createAccount": "Créez votre compte pour rejoindre l'équipe.",
+    "invalid": "Invitation invalide ou expirée",
+    "missingToken": "Token d'invitation manquant",
+    "verifying": "Vérification de l'invitation...",
+    "viaInvite": "Inscription via invitation. Votre organisation est pré-configurée.",
+    "missingOrg": "Lien d'invitation manquant. Demandez une invitation à votre responsable."
+  },
+  "profile": {
+    "deactivated": "Compte désactivé",
+    "deactivatedMsg": "Contactez votre responsable pour réactiver votre accès."
+  }
+}

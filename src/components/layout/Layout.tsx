@@ -1,7 +1,7 @@
 import { Home, FileText, Settings, User, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, Outlet } from 'react-router-dom'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuthStore } from '../../store/authStore'
 import { Button } from '../ui/Button'
 
 export function Layout() {
