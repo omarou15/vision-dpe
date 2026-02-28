@@ -484,6 +484,8 @@ export interface Enveloppe {
   baie_vitree_collection: BaieVitreeCollection;
   plancher_bas_collection: PlancherBasCollection;
   plancher_haut_collection: PlancherHautCollection;
+  porte_collection?: PorteCollection;
+  pont_thermique_collection?: PontThermiqueCollection;
 }
 
 export interface Inertie {
@@ -650,4 +652,151 @@ export interface XMLValidationResult {
   valid: boolean;
   schema_errors: string[];
   coherence_errors: string[];
+}
+
+// ============================================================================
+// TYPES CALCULS 3CL - Pour CalculationService
+// ============================================================================
+
+export enum EnumTypeEnergie {
+  ELECTRICITE = 1,
+  GAZ_NATUREL = 2,
+  GPL = 3,
+  FIOUL = 4,
+  BOIS_BUCHE = 5,
+  BOIS_GRANULE = 6,
+  BOIS_PLAQUETTE = 7,
+  CHARBON = 8,
+  RESEAU_CHALEUR = 9,
+  RESEAU_FROID = 10,
+  ELECTRICITE_VERTE = 11,
+  AUTRE = 12,
+  AUCUN = 13,
+  ELECTRICITE_PAC = 14,
+  ELECTRICITE_DIRECTE = 15,
+}
+
+export interface Sortie {
+  deperdition?: SortieDeperdition;
+  apport_et_besoin?: SortieApportEtBesoin;
+  ef_conso?: SortieEfConso;
+  ep_conso?: SortieEpConso;
+  emission_ges?: SortieEmissionGes;
+  cout?: SortieCout;
+  qualite_isolation?: SortieQualiteIsolation;
+}
+
+export interface SortieDeperdition {
+  hvent: number;
+  hperm: number;
+  deperdition_renouvellement_air: number;
+  deperdition_mur: number;
+  deperdition_plancher_bas: number;
+  deperdition_plancher_haut: number;
+  deperdition_baie_vitree: number;
+  deperdition_pont_thermique: number;
+  deperdition_enveloppe: number;
+}
+
+export interface SortieApportEtBesoin {
+  besoin_ch: number;
+  besoin_ecs: number;
+  apport_solaire_fr: number;
+  apport_interne_fr: number;
+}
+
+export interface SortieEfConso {
+  conso_ch: number;
+  conso_ch_depensier?: number;
+  conso_ecs: number;
+  conso_ecs_depensier?: number;
+  conso_eclairage: number;
+  conso_auxiliaire_ventilation: number;
+  conso_totale: number;
+  conso_totale_auxiliaire?: number;
+  conso_auxiliaire_generation_ch?: number;
+  conso_auxiliaire_generation_ch_depensier?: number;
+  conso_auxiliaire_distribution_ch?: number;
+  conso_auxiliaire_generation_ecs?: number;
+  conso_auxiliaire_generation_ecs_depensier?: number;
+  conso_auxiliaire_distribution_ecs?: number;
+  conso_fr?: number;
+  conso_fr_depensier?: number;
+  conso_5_usages: number;
+  conso_5_usages_m2: number;
+}
+
+export interface SortieEpConso {
+  ep_conso_ch: number;
+  ep_conso_ch_depensier?: number;
+  ep_conso_ecs: number;
+  ep_conso_ecs_depensier?: number;
+  ep_conso_eclairage: number;
+  ep_conso_auxiliaire_ventilation: number;
+  ep_conso_totale: number;
+  ep_conso_5_usages_m2: number;
+  ep_conso_5_usages?: number;
+  classe_bilan_dpe?: string;
+}
+
+export interface SortieEmissionGes {
+  emission_ges_ch: number;
+  emission_ges_ecs: number;
+  emission_ges_eclairage: number;
+  emission_ges_auxiliaire_ventilation: number;
+  emission_ges_totale: number;
+  emission_ges_5_usages_m2: number;
+  classe_emission_ges?: string;
+}
+
+export interface SortieCout {
+  cout_ch: number;
+  cout_ecs: number;
+  cout_eclairage: number;
+  cout_auxiliaire_ventilation: number;
+  cout_total: number;
+}
+
+export interface SortieQualiteIsolation {
+  ubat: number;
+  ubat_moyen_mur: number;
+  ubat_moyen_plancher_bas: number;
+  ubat_moyen_plancher_haut: number;
+}
+
+export interface PontThermique {
+  donnee_entree: {
+    reference: string;
+    longueur: number;
+    l?: number; // alias pour longueur
+    enum_type_liaison_id: EnumTypeLiaison;
+    k?: number; // coefficient k
+  };
+  donnee_intermediaire?: {
+    kpt: number;
+    k?: number;
+    deperdition_pt: number;
+  };
+}
+
+export interface PontThermiqueCollection {
+  pont_thermique: PontThermique | PontThermique[];
+}
+
+export interface PorteCollection {
+  porte: Porte | Porte[];
+}
+
+export interface Porte {
+  donnee_entree: {
+    reference: string;
+    surface_porte: number;
+    enum_type_porte_id: EnumTypePorte;
+  };
+}
+
+export interface Meteo {
+  enum_zone_climatique_id: EnumZoneClimatique;
+  enum_classe_altitude_id: EnumClasseAltitude;
+  altitude?: number;
 }

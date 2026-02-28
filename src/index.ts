@@ -6,23 +6,9 @@
 export * from './types';
 
 // Services
-export { 
-  AuthService, 
-  createAuthService,
-  getAuthService,
-} from './services/AuthService';
-
-export { 
-  ValidationService,
-  createValidationService,
-  getValidationService,
-} from './services/ValidationService';
-
-export { 
-  XMLGeneratorService,
-  createXMLGeneratorService,
-  getXMLGeneratorService,
-} from './services/XMLGeneratorService';
+export { AuthService } from './services/AuthService';
+export { ValidationService } from './services/ValidationService';
+export { XMLGeneratorService } from './services/XMLGeneratorService';
 
 // Version
 export const VERSION = '0.1.0';
