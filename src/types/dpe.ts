@@ -2,10 +2,13 @@
  * Types DPE - Diagnostic de Performance Énergétique
  * Basé sur la méthode 3CL et XSD ADEME v2.6
  * CORRIGÉ après validation contre XML ADEME réel
+ * 
+ * NEXUS - Phase 2: Enveloppe (étapes 4-8)
+ * Enums vérifiés et corrigés selon enums.json
  */
 
 // ============================================================================
-// ENUMS ADEME
+// ENUMS ADEME - BASE
 // ============================================================================
 
 export enum EnumModeleDpe {
@@ -109,6 +112,269 @@ export enum EnumEtiquetteDpe {
   E = "E",
   F = "F",
   G = "G",
+}
+
+// ============================================================================
+// ENUMS ENVELOPPE - PHASE 2
+// ============================================================================
+
+/**
+ * EnumMateriauxStructureMur - 27 valeurs
+ * Source: enums.json -> materiaux_structure_mur
+ */
+export enum EnumMateriauxStructureMur {
+  INCONNU = 1,
+  PIERRE_TAILLE_MOELLONS_SEUL = 2,
+  PIERRE_TAILLE_MOELLONS_REMPLISSAGE = 3,
+  PISE_TERRE_STABILISEE = 4,
+  PAN_BOIS_SANS_REMPLISSAGE = 5,
+  PAN_BOIS_AVEC_REMPLISSAGE = 6,
+  BOIS_RONDIN = 7,
+  BRIQUES_PLEINES_SIMPLES = 8,
+  BRIQUES_PLEINES_DOUBLES_LAME_AIR = 9,
+  BRIQUES_CREUSES = 10,
+  BLOCS_BETON_PLEINS = 11,
+  BLOCS_BETON_CREUX = 12,
+  BETON_BANCHE = 13,
+  BETON_MACHEFER = 14,
+  BRIQUE_TERRE_CUITE_ALVEOLAIRE = 15,
+  BETON_CELLULAIRE_AVANT_2013 = 16,
+  BETON_CELLULAIRE_A_PARTIR_2013 = 17,
+  OSSATURE_BOIS_ISOLANT_REMPLISSAGE_SUP_2006 = 18,
+  MUR_SANDWICH_BETON_ISOLANT_BETON = 19,
+  CLOISON_PLATRE = 20,
+  AUTRE_MATERIAU_TRADITIONNEL_ANCIEN = 21,
+  AUTRE_MATERIAU_INNOVANT_RECENT = 22,
+  AUTRE_MATERIAU_NON_REPERTORIE = 23,
+  OSSATURE_BOIS_ISOLANT_REMPLISSAGE_2001_2005 = 24,
+  OSSATURE_BOIS_SANS_REMPLISSAGE = 25,
+  OSSATURE_BOIS_ISOLANT_REMPLISSAGE_INF_2001 = 26,
+  OSSATURE_BOIS_REMPLISSAGE_TOUT_VENANT = 27,
+}
+
+/**
+ * EnumTypeIsolation - 9 valeurs
+ * Source: enums.json -> type_isolation
+ */
+export enum EnumTypeIsolation {
+  INCONNU = 1,
+  NON_ISOLE = 2,
+  ITI = 3,
+  ITE = 4,
+  ITR = 5,
+  ITI_ITE = 6,
+  ITI_ITR = 7,
+  ITE_ITR = 8,
+  ISOLE_TYPE_INCONNU = 9,
+}
+
+/**
+ * EnumTypeDoublage - 5 valeurs
+ * Source: enums.json -> type_doublage
+ */
+export enum EnumTypeDoublage {
+  INCONNU = 1,
+  ABSENCE_DOUBLAGE = 2,
+  DOUBLAGE_INDETERMINE_LAME_AIR_INF_15MM = 3,
+  DOUBLAGE_INDETERMINE_LAME_AIR_SUP_15MM = 4,
+  DOUBLAGE_CONNU = 5,
+}
+
+/**
+ * EnumMethodeSaisieU - 10 valeurs
+ * Source: enums.json -> methode_saisie_u
+ */
+export enum EnumMethodeSaisieU {
+  NON_ISOLE = 1,
+  ISOLATION_INCONNUE_TABLE_FORFAITAIRE = 2,
+  EPAISSEUR_ISOLATION_SAISIE_MESURE_OBSERVATION = 3,
+  EPAISSEUR_ISOLATION_SAISIE_DOCUMENTS_JUSTIFICATIFS = 4,
+  RESISTANCE_ISOLATION_SAISIE_OBSERVATION_MESURE = 5,
+  RESISTANCE_ISOLATION_SAISIE_DOCUMENTS_JUSTIFICATIFS = 6,
+  ANNEE_ISOLATION_DIFFERENTE_CONSTRUCTION_SAISIE_JUSTIFIEE = 7,
+  ANNEE_CONSTRUCTION_SAISIE_TABLE_FORFAITAIRE = 8,
+  SAISIE_DIRECT_U_JUSTIFIEE = 9,
+  SAISIE_DIRECT_U_RSET_RSEE = 10,
+}
+
+/**
+ * EnumTypePlancherBas - 13 valeurs
+ * Source: enums.json -> type_plancher_bas
+ */
+export enum EnumTypePlancherBas {
+  INCONNU = 1,
+  PLANCHER_AVEC_SANS_REMPLISSAGE = 2,
+  PLANCHER_ENTRE_SOLIVES_METALLIQUES = 3,
+  PLANCHER_ENTRE_SOLIVES_BOIS = 4,
+  PLANCHER_BOIS_SUR_SOLIVES_METALLIQUES = 5,
+  BARDEAUX_ET_REMPLISSAGE = 6,
+  VOUTAINS_SUR_SOLIVES_METALLIQUES = 7,
+  VOUTAINS_BRIQUES_MOELLONS = 8,
+  DALLE_BETON = 9,
+  PLANCHER_BOIS_SUR_SOLIVES_BOIS = 10,
+  PLANCHER_LOURD_ENTREVOUS_TERRE_CUITE = 11,
+  PLANCHER_ENTREVOUS_ISOLANT = 12,
+  AUTRE_TYPE_PLANCHER_NON_REPERTORIE = 13,
+}
+
+/**
+ * EnumTypePlancherHaut - 16 valeurs
+ * Source: enums.json -> type_plancher_haut
+ */
+export enum EnumTypePlancherHaut {
+  INCONNU = 1,
+  PLAFOND_AVEC_SANS_REMPLISSAGE = 2,
+  PLAFOND_ENTRE_SOLIVES_METALLIQUES = 3,
+  PLAFOND_ENTRE_SOLIVES_BOIS = 4,
+  PLAFOND_BOIS_SUR_SOLIVES_METALLIQUES = 5,
+  PLAFOND_BOIS_SOUS_SOLIVES_METALLIQUES = 6,
+  BARDEAUX_ET_REMPLISSAGE = 7,
+  DALLE_BETON = 8,
+  PLAFOND_BOIS_SUR_SOLIVES_BOIS = 9,
+  PLAFOND_BOIS_SOUS_SOLIVES_BOIS = 10,
+  PLAFOND_LOURD_ENTREVOUS_TERRE_CUITE = 11,
+  COMBLES_AMENAGES_SOUS_RAMPANT = 12,
+  TOITURE_CHAUME = 13,
+  PLAFOND_PLAQUE_PLATRE = 14,
+  AUTRE_TYPE_PLAFOND_NON_REPERTORIE = 15,
+  TOITURES_BAC_ACIER = 16,
+}
+
+/**
+ * EnumTypeLiaison - 5 valeurs (ponts thermiques)
+ * Source: enums.json -> type_liaison
+ */
+export enum EnumTypeLiaison {
+  PLANCHER_BAS_MUR = 1,
+  PLANCHER_INTERMEDIAIRE_LOURD_MUR = 2,
+  PLANCHER_HAUT_LOURD_MUR = 3,
+  REFEND_MUR = 4,
+  MENUISERIE_MUR = 5,
+}
+
+/**
+ * EnumMethodeSaisieU0 - 5 valeurs
+ * Source: enums.json -> methode_saisie_u0
+ */
+export enum EnumMethodeSaisieU0 {
+  TYPE_PAROI_INCONNU = 1,
+  DETERMINE_SELON_MATERIAU_EPAISSEUR = 2,
+  SAISIE_DIRECT_U0_JUSTIFIEE = 3,
+  SAISIE_DIRECT_U0_PERFORMANCE_ITI = 4,
+  U0_NON_SAISI_U_CONNU_JUSTIFIE = 5,
+}
+
+/**
+ * EnumMethodeSaisiePerfVitrage - 15 valeurs
+ * Source: enums.json -> methode_saisie_perf_vitrage
+ */
+export enum EnumMethodeSaisiePerfVitrage {
+  UG_UW_UJN_SW_TABLES_FORFAITAIRES = 1,
+  UG_DIRECT_DOCUMENTS_AUTRES_TABLES = 2,
+  UG_UW_DIRECT_DOCUMENTS_AUTRES_TABLES = 3,
+  UG_UW_SW_DIRECT_DOCUMENTS_UJN_TABLES = 4,
+  UG_UW_UJN_DIRECT_DOCUMENTS_AUTRES_TABLES = 5,
+  UG_UW_SW_UJN_DIRECT_DOCUMENTS = 6,
+  UJN_SW_RSET_RSEE = 7,
+  UW_SW_DIRECT_DOCUMENTS_UJN_TABLES = 8,
+  UW_UJN_DIRECT_DOCUMENTS_SW_TABLES = 9,
+  UW_UJN_SW_DIRECT_DOCUMENTS = 10,
+  UJN_SW_DIRECT_DOCUMENTS = 11,
+  UJN_DIRECT_DOCUMENTS_SW_TABLES = 12,
+  UW_DIRECT_DOCUMENTS_UJN_SW_TABLES = 13,
+  SW_DIRECT_DOCUMENTS_UJN_UW_TABLES = 14,
+  UG_SW_DIRECT_DOCUMENTS_UJN_UW_TABLES = 15,
+}
+
+/**
+ * EnumTypeVitrage - 6 valeurs
+ * Source: enums.json -> type_vitrage
+ */
+export enum EnumTypeVitrage {
+  SIMPLE_VITRAGE = 1,
+  DOUBLE_VITRAGE = 2,
+  TRIPLE_VITRAGE = 3,
+  SURVITRAGE = 4,
+  BRIQUE_DE_VERRE = 5,
+  POLYCARBONATE = 6,
+}
+
+/**
+ * EnumTypeMenuiserie - 7 valeurs
+ * Source: enums.json -> type_materiaux_menuiserie
+ */
+export enum EnumTypeMenuiserie {
+  BRIQUE_DE_VERRE = 1,
+  POLYCARBONATE = 2,
+  BOIS = 3,
+  BOIS_METAL = 4,
+  PVC = 5,
+  METAL_AVEC_RUPTURE_PT = 6,
+  METAL_SANS_RUPTURE_PT = 7,
+}
+
+/**
+ * EnumTypeBaie - 8 valeurs
+ * Source: enums.json -> type_baie
+ */
+export enum EnumTypeBaie {
+  BRIQUE_VERRE_PLEINE = 1,
+  BRIQUE_VERRE_CREUSE = 2,
+  POLYCARBONATE = 3,
+  FENETRES_BATTANTES = 4,
+  FENETRES_COULISSANTES = 5,
+  PORTES_FENETRES_COULISSANTES = 6,
+  PORTES_FENETRES_BATTANTES_SANS_SOUBASSEMENT = 7,
+  PORTES_FENETRES_BATTANTES_AVEC_SOUBASSEMENT = 8,
+}
+
+/**
+ * EnumTypePose - 4 valeurs
+ * Source: enums.json -> type_pose
+ */
+export enum EnumTypePose {
+  NU_EXTERIEUR = 1,
+  NU_INTERIEUR = 2,
+  TUNNEL = 3,
+  SANS_OBJET = 4,
+}
+
+/**
+ * EnumTypeFermeture - 8 valeurs
+ * Source: enums.json -> type_fermeture
+ */
+export enum EnumTypeFermeture {
+  ABSENCE_FERMETURE = 1,
+  JALOUSIE_ACCORDEON_LAMES_ORIENTABLES = 2,
+  FERMETURE_SANS_AJOURS_VOLETS_ROULANTS_ALU = 3,
+  VOLETS_ROULANTS_PVC_BOIS_E_INF_12 = 4,
+  PERSIENNE_COULISSANTE_VOLET_BATTANT_PVC_BOIS_E_INF_22 = 5,
+  VOLETS_ROULANTS_PVC_BOIS_E_SUP_12 = 6,
+  PERSIENNE_COULISSANTE_VOLET_BATTANT_PVC_BOIS_E_SUP_22 = 7,
+  FERMETURE_ISOLEE_SANS_AJOURS = 8,
+}
+
+/**
+ * EnumTypePorte - 16 valeurs
+ * Source: enums.json -> type_porte
+ */
+export enum EnumTypePorte {
+  BOIS_OPAQUE_PLEINE = 1,
+  BOIS_MOINS_30_VITRAGE_SIMPLE = 2,
+  BOIS_30_60_VITRAGE_SIMPLE = 3,
+  BOIS_DOUBLE_VITRAGE = 4,
+  PVC_OPAQUE_PLEINE = 5,
+  PVC_MOINS_30_VITRAGE_SIMPLE = 6,
+  PVC_30_60_VITRAGE_SIMPLE = 7,
+  PVC_DOUBLE_VITRAGE = 8,
+  METAL_OPAQUE_PLEINE = 9,
+  METAL_VITRAGE_SIMPLE = 10,
+  METAL_MOINS_30_DOUBLE_VITRAGE = 11,
+  METAL_30_60_DOUBLE_VITRAGE = 12,
+  TOUTE_MENUISERIE_OPAQUE_PLEINE_ISOLEE = 13,
+  TOUTE_MENUISERIE_PORTE_SAS = 14,
+  TOUTE_MENUISERIE_ISOLEE_DOUBLE_VITRAGE = 15,
+  AUTRE_TYPE_PORTE = 16,
 }
 
 // ============================================================================
@@ -248,12 +514,12 @@ export interface MurDonneeEntree {
   tv_umur0_id?: number;
   tv_umur_id?: number;
   epaisseur_structure?: number;
-  enum_materiaux_structure_mur_id?: number;
-  enum_methode_saisie_u0_id?: number;
-  enum_type_doublage_id?: number;
+  enum_materiaux_structure_mur_id?: EnumMateriauxStructureMur;
+  enum_methode_saisie_u0_id?: EnumMethodeSaisieU0;
+  enum_type_doublage_id?: EnumTypeDoublage;
   paroi_ancienne: number; // 0 ou 1
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
+  enum_type_isolation_id: EnumTypeIsolation;
+  enum_methode_saisie_u_id: EnumMethodeSaisieU;
 }
 
 export interface MurDonneeIntermediaire {
@@ -278,6 +544,12 @@ export interface BaieVitreeDonneeEntree {
   enum_type_adjacence_id: EnumTypeAdjacence;
   enum_orientation_id: EnumOrientation;
   surface_totale_baie: number;
+  enum_type_vitrage_id?: EnumTypeVitrage;
+  enum_type_materiaux_menuiserie_id?: EnumTypeMenuiserie;
+  enum_type_baie_id?: EnumTypeBaie;
+  enum_type_pose_id?: EnumTypePose;
+  enum_type_fermeture_id?: EnumTypeFermeture;
+  enum_methode_saisie_perf_vitrage_id?: EnumMethodeSaisiePerfVitrage;
 }
 
 export interface BaieVitreeDonneeIntermediaire {
@@ -302,8 +574,10 @@ export interface PlancherBasDonneeEntree {
   paroi_lourde: number;
   tv_upb0_id?: number;
   tv_upb_id?: number;
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
+  enum_type_plancher_bas_id?: EnumTypePlancherBas;
+  enum_type_isolation_id: EnumTypeIsolation;
+  enum_methode_saisie_u_id: EnumMethodeSaisieU;
+  enum_methode_saisie_u0_id?: EnumMethodeSaisieU0;
 }
 
 export interface PlancherBasDonneeIntermediaire {
@@ -329,8 +603,10 @@ export interface PlancherHautDonneeEntree {
   paroi_lourde: number;
   tv_uph0_id?: number;
   tv_uph_id?: number;
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
+  enum_type_plancher_haut_id?: EnumTypePlancherHaut;
+  enum_type_isolation_id: EnumTypeIsolation;
+  enum_methode_saisie_u_id: EnumMethodeSaisieU;
+  enum_methode_saisie_u0_id?: EnumMethodeSaisieU0;
 }
 
 export interface PlancherHautDonneeIntermediaire {
