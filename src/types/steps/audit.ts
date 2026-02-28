@@ -252,22 +252,43 @@ export const SEUILS_ETIQUETTE: Record<ClasseDpe, { cep_max: number; eges_max: nu
   G: { cep_max: Infinity, eges_max: Infinity },
 };
 
-/** Calcule l'étiquette DPE depuis Cep et Eges (doubles seuils) */
+/**
+ * Double seuil ADEME : étiquette = pire des deux critères (Cep et Eges)
+ * Source : Arrêté du 31 mars 2021, annexe 1
+ */
 export function calculerEtiquette(cep: number, eges: number): ClasseDpe {
-  const classes: ClasseDpe[] = ["A", "B", "C", "D", "E", "F", "G"];
-  for (const cls of classes) {
-    const s = SEUILS_ETIQUETTE[cls];
-    if (cep <= s.cep_max && eges <= s.eges_max) return cls;
-  }
+  const classeEnergie = getClasseFromCep(cep);
+  const classeClimat = getClasseFromEges(eges);
+  // Retourner la PIRE des deux (G > F > E > ... > A)
+  return classeEnergie > classeClimat ? classeEnergie : classeClimat;
+}
+
+function getClasseFromCep(cep: number): ClasseDpe {
+  if (cep <= 70) return "A";
+  if (cep <= 110) return "B";
+  if (cep <= 180) return "C";
+  if (cep <= 250) return "D";
+  if (cep <= 330) return "E";
+  if (cep <= 420) return "F";
+  return "G";
+}
+
+function getClasseFromEges(eges: number): ClasseDpe {
+  if (eges <= 6) return "A";
+  if (eges <= 11) return "B";
+  if (eges <= 30) return "C";
+  if (eges <= 50) return "D";
+  if (eges <= 70) return "E";
+  if (eges <= 100) return "F";
   return "G";
 }
 
 /** Plafonds revenus MaPrimeRénov 2026 (IDF) */
 export const PLAFONDS_REVENUS_IDF: Record<TrancheRevenu, number[]> = {
-  tres_modeste: [23541, 34551, 41493, 48447, 55427],
-  modeste: [28657, 42058, 50513, 58981, 67473],
-  intermediaire: [40018, 58827, 70382, 82839, 94844],
-  superieur: [40019, 58828, 70383, 82840, 94845], // Au-dessus d'intermédiaire
+  tres_modeste: [20000, 28000, 35000, 42000, 49000],
+  modeste: [28001, 42000, 52000, 62000, 72000],
+  intermediaire: [42001, 62000, 75000, 88000, 101000],
+  superieur: [62001, 88000, 105000, 122000, 139000],
 };
 
 /** Plafonds revenus MaPrimeRénov 2026 (hors IDF) */

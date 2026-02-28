@@ -11,7 +11,7 @@ describe("calculerEtiquette — doubles seuils EP + GES", () => {
   it("F : Cep=400 Eges=90", () => expect(calculerEtiquette(400, 90)).toBe("F"));
   it("G : Cep=500 Eges=120", () => expect(calculerEtiquette(500, 120)).toBe("G"));
   it("Double seuil : Cep=60 mais Eges=15 → B (GES déclasse)", () => expect(calculerEtiquette(60, 15)).toBe("C"));
-  it("Double seuil : Cep=200 mais Eges=5 → C (EP déclasse)", () => expect(calculerEtiquette(200, 5)).toBe("C"));
+  it("Double seuil : Cep=200 mais Eges=5 → D (EP déclasse)", () => expect(calculerEtiquette(200, 5)).toBe("D"));
 });
 
 describe("determinerTrancheRevenu", () => {
