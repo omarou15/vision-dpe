@@ -3,8 +3,9 @@ import { useParams } from "react-router-dom";
 import { useProjetStore } from "@/store/projetStore";
 import * as syncService from "@/services/sync";
 import type { BilanEtatInitial, ConsommationParUsage, DeperditionsParPoste } from "@/types/steps/audit";
-import { calculerEtiquette, type ClasseDpe } from "@/types/steps/audit";
-import { Card, Button } from "@/components/ui";
+import { calculerEtiquette } from "@/types/steps/audit";
+import type { ClasseDpe } from "@/types/steps/step12-14";
+import { Card, Button, Alert } from "@/components/ui";
 
 const ETIQUETTE_COLORS: Record<ClasseDpe, { bg: string; text: string; border: string }> = {
   A: { bg: "bg-green-500", text: "text-white", border: "border-green-600" },

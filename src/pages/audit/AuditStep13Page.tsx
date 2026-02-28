@@ -91,7 +91,6 @@ function EtapeAuditForm({ etape, onChange, onRemove, canRemove }: {
 }
 
 export default function AuditStep13Page() {
-  const { t } = useTranslation();
   const { projetId } = useParams<{ projetId: string }>();
   const { activeProjet, loadProjet, completeStep } = useProjetStore();
   const [parcours, setParcours] = useState<Parcours1Audit>({
