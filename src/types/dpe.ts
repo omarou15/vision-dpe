@@ -696,13 +696,19 @@ export interface SortieDeperdition {
   deperdition_baie_vitree: number;
   deperdition_pont_thermique: number;
   deperdition_enveloppe: number;
+  deperdition_porte?: number;
 }
 
 export interface SortieApportEtBesoin {
   besoin_ch: number;
+  besoin_ch_depensier?: number;
   besoin_ecs: number;
+  besoin_ecs_depensier?: number;
   apport_solaire_fr: number;
+  apport_solaire_ch?: number;
   apport_interne_fr: number;
+  apport_interne_ch?: number;
+  surface_sud_equivalente?: number;
 }
 
 export interface SortieEfConso {
@@ -736,25 +742,59 @@ export interface SortieEpConso {
   ep_conso_totale: number;
   ep_conso_5_usages_m2: number;
   ep_conso_5_usages?: number;
+  ep_conso_auxiliaire_generation_ch?: number;
+  ep_conso_auxiliaire_generation_ch_depensier?: number;
+  ep_conso_auxiliaire_distribution_ch?: number;
+  ep_conso_auxiliaire_generation_ecs?: number;
+  ep_conso_auxiliaire_generation_ecs_depensier?: number;
+  ep_conso_auxiliaire_distribution_ecs?: number;
+  ep_conso_totale_auxiliaire?: number;
+  ep_conso_fr?: number;
+  ep_conso_fr_depensier?: number;
   classe_bilan_dpe?: string;
 }
 
 export interface SortieEmissionGes {
   emission_ges_ch: number;
+  emission_ges_ch_depensier?: number;
   emission_ges_ecs: number;
+  emission_ges_ecs_depensier?: number;
   emission_ges_eclairage: number;
   emission_ges_auxiliaire_ventilation: number;
   emission_ges_totale: number;
   emission_ges_5_usages_m2: number;
+  emission_ges_5_usages?: number;
+  emission_ges_auxiliaire_generation_ch?: number;
+  emission_ges_auxiliaire_generation_ch_depensier?: number;
+  emission_ges_auxiliaire_distribution_ch?: number;
+  emission_ges_auxiliaire_generation_ecs?: number;
+  emission_ges_auxiliaire_generation_ecs_depensier?: number;
+  emission_ges_auxiliaire_distribution_ecs?: number;
+  emission_ges_totale_auxiliaire?: number;
+  emission_ges_fr?: number;
+  emission_ges_fr_depensier?: number;
   classe_emission_ges?: string;
 }
 
 export interface SortieCout {
   cout_ch: number;
+  cout_ch_depensier?: number;
   cout_ecs: number;
+  cout_ecs_depensier?: number;
   cout_eclairage: number;
   cout_auxiliaire_ventilation: number;
   cout_total: number;
+  cout_total_depensier?: number;
+  cout_auxiliaire_generation_ch?: number;
+  cout_auxiliaire_generation_ch_depensier?: number;
+  cout_auxiliaire_distribution_ch?: number;
+  cout_auxiliaire_generation_ecs?: number;
+  cout_auxiliaire_generation_ecs_depensier?: number;
+  cout_auxiliaire_distribution_ecs?: number;
+  cout_total_auxiliaire?: number;
+  cout_fr?: number;
+  cout_fr_depensier?: number;
+  cout_5_usages?: number;
 }
 
 export interface SortieQualiteIsolation {
@@ -762,6 +802,7 @@ export interface SortieQualiteIsolation {
   ubat_moyen_mur: number;
   ubat_moyen_plancher_bas: number;
   ubat_moyen_plancher_haut: number;
+  qualite_isol_enveloppe?: number;
 }
 
 export interface PontThermique {

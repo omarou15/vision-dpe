@@ -275,8 +275,8 @@ export class CalculationService implements ICalculationService {
       const etiquetteGES = this.getEtiquetteGES(emissionGes.emission_ges_5_usages_m2);
 
       // Mise à jour des étiquettes
-      sortie.ep_conso.classe_bilan_dpe = etiquetteEnergie;
-      sortie.emission_ges.classe_emission_ges = etiquetteGES;
+      sortie.ep_conso!.classe_bilan_dpe = etiquetteEnergie;
+      sortie.emission_ges!.classe_emission_ges = etiquetteGES;
 
       return {
         success: true,
@@ -506,8 +506,8 @@ export class CalculationService implements ICalculationService {
    * Calcule la déperdition d'un pont thermique
    */
   private calculatePontThermiqueDeperdition(pont: PontThermique, context: CalculationContext): number {
-    const k = pont.donnee_intermediaire.k;
-    const longueur = pont.donnee_entree.l;
+    const k = pont.donnee_intermediaire!.k ?? pont.donnee_intermediaire!.kpt;
+    const longueur = pont.donnee_entree.l ?? pont.donnee_entree.longueur;
     return k * longueur * context.dh / 1000;
   }
 
@@ -632,10 +632,12 @@ export class CalculationService implements ICalculationService {
       conso_fr_depensier: besoins.besoinRefroidissementDepensier,
       conso_5_usages: 0,
       conso_5_usages_m2: 0,
+      conso_totale: 0,
     };
 
-    ef.conso_5_usages = ef.conso_ch + ef.conso_ecs + ef.conso_eclairage + ef.conso_totale_auxiliaire;
+    ef.conso_5_usages = ef.conso_ch + ef.conso_ecs + ef.conso_eclairage + ef.conso_totale_auxiliaire!;
     ef.conso_5_usages_m2 = ef.conso_5_usages * 1000 / surface;
+    ef.conso_totale = ef.conso_5_usages;
 
     // Calcul de l'énergie primaire
     const cepChauffage = consoChauffage * COEFFICIENTS_CEP[EnumTypeEnergie.GAZ_NATUREL];
@@ -649,22 +651,24 @@ export class CalculationService implements ICalculationService {
       ep_conso_ecs: cepECS,
       ep_conso_ecs_depensier: consoECSDepensier * COEFFICIENTS_CEP[EnumTypeEnergie.GAZ_NATUREL],
       ep_conso_eclairage: cepEclairage,
-      ep_conso_auxiliaire_generation_ch: ef.conso_auxiliaire_generation_ch * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
-      ep_conso_auxiliaire_generation_ch_depensier: ef.conso_auxiliaire_generation_ch_depensier * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
-      ep_conso_auxiliaire_distribution_ch: ef.conso_auxiliaire_distribution_ch * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
-      ep_conso_auxiliaire_generation_ecs: ef.conso_auxiliaire_generation_ecs * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
-      ep_conso_auxiliaire_generation_ecs_depensier: ef.conso_auxiliaire_generation_ecs_depensier * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
-      ep_conso_auxiliaire_distribution_ecs: ef.conso_auxiliaire_distribution_ecs * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_generation_ch: ef.conso_auxiliaire_generation_ch! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_generation_ch_depensier: ef.conso_auxiliaire_generation_ch_depensier! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_distribution_ch: ef.conso_auxiliaire_distribution_ch! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_generation_ecs: ef.conso_auxiliaire_generation_ecs! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_generation_ecs_depensier: ef.conso_auxiliaire_generation_ecs_depensier! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
+      ep_conso_auxiliaire_distribution_ecs: ef.conso_auxiliaire_distribution_ecs! * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
       ep_conso_auxiliaire_ventilation: ef.conso_auxiliaire_ventilation * COEFFICIENTS_CEP[EnumTypeEnergie.ELECTRICITE],
       ep_conso_totale_auxiliaire: cepAuxiliaire,
       ep_conso_fr: 0,
       ep_conso_fr_depensier: 0,
       ep_conso_5_usages: 0,
       ep_conso_5_usages_m2: 0,
+      ep_conso_totale: 0,
       classe_bilan_dpe: EnumEtiquetteDpe.D,
     };
 
-    ep.ep_conso_5_usages = ep.ep_conso_ch + ep.ep_conso_ecs + ep.ep_conso_eclairage + ep.ep_conso_totale_auxiliaire;
+    ep.ep_conso_5_usages = ep.ep_conso_ch + ep.ep_conso_ecs + ep.ep_conso_eclairage + ep.ep_conso_totale_auxiliaire!;
+    ep.ep_conso_totale = ep.ep_conso_5_usages;
     ep.ep_conso_5_usages_m2 = ep.ep_conso_5_usages * 1000 / surface;
 
     return { ef, ep };
@@ -694,22 +698,24 @@ export class CalculationService implements ICalculationService {
       emission_ges_ecs: emissionECS,
       emission_ges_ecs_depensier: emissionECSDepensier,
       emission_ges_eclairage: emissionEclairage,
-      emission_ges_auxiliaire_generation_ch: consommations.conso_auxiliaire_generation_ch * facteurElec,
-      emission_ges_auxiliaire_generation_ch_depensier: consommations.conso_auxiliaire_generation_ch_depensier * facteurElec,
-      emission_ges_auxiliaire_distribution_ch: consommations.conso_auxiliaire_distribution_ch * facteurElec,
-      emission_ges_auxiliaire_generation_ecs: consommations.conso_auxiliaire_generation_ecs * facteurElec,
-      emission_ges_auxiliaire_generation_ecs_depensier: consommations.conso_auxiliaire_generation_ecs_depensier * facteurElec,
-      emission_ges_auxiliaire_distribution_ecs: consommations.conso_auxiliaire_distribution_ecs * facteurElec,
+      emission_ges_auxiliaire_generation_ch: consommations.conso_auxiliaire_generation_ch! * facteurElec,
+      emission_ges_auxiliaire_generation_ch_depensier: consommations.conso_auxiliaire_generation_ch_depensier! * facteurElec,
+      emission_ges_auxiliaire_distribution_ch: consommations.conso_auxiliaire_distribution_ch! * facteurElec,
+      emission_ges_auxiliaire_generation_ecs: consommations.conso_auxiliaire_generation_ecs! * facteurElec,
+      emission_ges_auxiliaire_generation_ecs_depensier: consommations.conso_auxiliaire_generation_ecs_depensier! * facteurElec,
+      emission_ges_auxiliaire_distribution_ecs: consommations.conso_auxiliaire_distribution_ecs! * facteurElec,
       emission_ges_auxiliaire_ventilation: consommations.conso_auxiliaire_ventilation * facteurElec,
       emission_ges_totale_auxiliaire: emissionAuxiliaire,
       emission_ges_fr: 0,
       emission_ges_fr_depensier: 0,
       emission_ges_5_usages: 0,
       emission_ges_5_usages_m2: 0,
+      emission_ges_totale: 0,
       classe_emission_ges: EnumEtiquetteDpe.D,
     };
 
     emissionGes.emission_ges_5_usages = emissionChauffage + emissionECS + emissionEclairage + emissionAuxiliaire;
+    emissionGes.emission_ges_totale = emissionGes.emission_ges_5_usages;
     emissionGes.emission_ges_5_usages_m2 = emissionGes.emission_ges_5_usages * 1000 / surface;
     emissionGes.classe_emission_ges = this.getEtiquetteGES(emissionGes.emission_ges_5_usages_m2);
 
@@ -733,13 +739,14 @@ export class CalculationService implements ICalculationService {
       cout_ecs: coutECS,
       cout_ecs_depensier: coutECSDepensier,
       cout_eclairage: coutEclairage,
-      cout_auxiliaire_generation_ch: consommations.conso_auxiliaire_generation_ch * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
-      cout_auxiliaire_generation_ch_depensier: consommations.conso_auxiliaire_generation_ch_depensier * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
-      cout_auxiliaire_distribution_ch: consommations.conso_auxiliaire_distribution_ch * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
-      cout_auxiliaire_generation_ecs: consommations.conso_auxiliaire_generation_ecs * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
-      cout_auxiliaire_generation_ecs_depensier: consommations.conso_auxiliaire_generation_ecs_depensier * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
-      cout_auxiliaire_distribution_ecs: consommations.conso_auxiliaire_distribution_ecs * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
       cout_auxiliaire_ventilation: consommations.conso_auxiliaire_ventilation * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_total: 0,
+      cout_auxiliaire_generation_ch: consommations.conso_auxiliaire_generation_ch! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_auxiliaire_generation_ch_depensier: consommations.conso_auxiliaire_generation_ch_depensier! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_auxiliaire_distribution_ch: consommations.conso_auxiliaire_distribution_ch! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_auxiliaire_generation_ecs: consommations.conso_auxiliaire_generation_ecs! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_auxiliaire_generation_ecs_depensier: consommations.conso_auxiliaire_generation_ecs_depensier! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
+      cout_auxiliaire_distribution_ecs: consommations.conso_auxiliaire_distribution_ecs! * COUTS_ENERGIE[EnumTypeEnergie.ELECTRICITE],
       cout_total_auxiliaire: coutAuxiliaire,
       cout_fr: 0,
       cout_fr_depensier: 0,
@@ -747,6 +754,7 @@ export class CalculationService implements ICalculationService {
     };
 
     cout.cout_5_usages = coutChauffage + coutECS + coutEclairage + coutAuxiliaire;
+    cout.cout_total = cout.cout_5_usages;
 
     return cout;
   }

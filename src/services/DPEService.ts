@@ -884,9 +884,11 @@ export class DPEService implements IDPEService {
       conso_fr_depensier: 0,
       conso_5_usages: 0,
       conso_5_usages_m2: 0,
+      conso_totale: 0,
     };
 
     efConso.conso_5_usages = efConso.conso_ch + efConso.conso_ecs + efConso.conso_eclairage + efConso.conso_totale_auxiliaire;
+    efConso.conso_totale = efConso.conso_5_usages;
     efConso.conso_5_usages_m2 = efConso.conso_5_usages * 1000 / surface;
 
     const epConso: SortieEpConso = {
