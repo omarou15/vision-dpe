@@ -27,6 +27,9 @@ export interface LocalProjet {
 
   /** Données wizard : chaque clé = "step_X", valeur = JSONB avec updated_at par champ */
   data: Record<string, StepData>;
+  
+  /** Numéro DPE (optionnel) */
+  numero_dpe?: string;
 
   /** Photos en attente de sync (base64 compressé) */
   pending_photos: PendingPhoto[];

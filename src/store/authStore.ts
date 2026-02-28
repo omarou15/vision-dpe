@@ -6,6 +6,7 @@ interface AuthState {
   // État
   profile: Profile | null;
   organisation: Organisation | null;
+  user: any | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   error: string | null;
@@ -23,14 +24,18 @@ interface AuthState {
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   clearError: () => void;
+  setUser: (user: any | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   profile: null,
   organisation: null,
+  user: null,
   isLoading: true,
   isAuthenticated: false,
   error: null,
+
+  setUser: (user) => set({ user }),
 
   initialize: async () => {
     set({ isLoading: true, error: null });

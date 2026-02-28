@@ -60,3 +60,7 @@ export const PEF_ELECTRICITE = 1.9;
 
 /** URL API BAN géocodage */
 export const BAN_API_URL = "https://api-adresse.data.gouv.fr";
+
+/** Constantes de compatibilité */
+export const DPE_STEPS_COUNT = 14;
+export const AUDIT_STEPS_COUNT = 20;

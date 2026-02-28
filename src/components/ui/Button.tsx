@@ -10,6 +10,8 @@ const buttonVariants = cva(
         primary: "bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700",
         secondary:
           "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100",
+        outline:
+          "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100",
         danger: "bg-red-600 text-white hover:bg-red-700 active:bg-red-800",
         ghost: "text-gray-600 hover:bg-gray-100 active:bg-gray-200",
         link: "text-blue-500 underline-offset-4 hover:underline",

@@ -11,7 +11,7 @@
  * Étape 20 : Export XML audit
  */
 
-import type { ClasseDpe, PosteTravaux, Travail } from "./step12-14";
+import { ClasseDpe, PosteTravaux, Travail } from "./step12-14";
 
 // ════════════════════════════════════════════════════════════
 // ÉTAPE 12 AUDIT — BILAN ÉTAT INITIAL
