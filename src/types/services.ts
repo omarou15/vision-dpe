@@ -4,7 +4,7 @@
  */
 
 import { ValidationResult, ValidationError } from "./validation";
-import { DPEDocument } from "./dpe";
+import { DPEDocument, XMLValidationResult } from "./dpe";
 
 // ============================================================================
 // AUTH SERVICE
@@ -257,7 +257,7 @@ export interface IXMLGeneratorService {
   /**
    * Valide un XML généré
    */
-  validate(xmlContent: string, options?: XMLValidationOptions): import("./dpe").XMLValidationResult;
+  validate(xmlContent: string, options?: XMLValidationOptions): XMLValidationResult;
 
   /**
    * Exporte le XML vers un fichier

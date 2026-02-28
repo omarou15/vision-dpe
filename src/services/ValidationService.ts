@@ -1,614 +1,555 @@
 /**
- * ValidationService - Service de validation des données DPE
- * Phase 1 - Module Administratif
- * 
- * Valide les données selon les règles métier de la méthode 3CL ADEME
+ * Service de validation des données DPE
+ * Implémente les règles de cohérence métier ADEME
  */
 
 import {
-  IValidationService,
-  ValidationRule,
-  ValidationOptions,
-  CoherenceRule,
-} from "../types/services";
-import {
+  DPEDocument,
   ValidationResult,
   ValidationError,
-} from "../types/validation";
+  EnumPeriodeConstruction,
+  EnumZoneClimatique,
+  EnumMethodeApplicationDpeLog,
+} from '../types';
+
+// ============================================================================
+// TYPES SPÉCIFIQUES VALIDATION
+// ============================================================================
+
+export interface StepValidationResult {
+  step: number;
+  valid: boolean;
+  errors: ValidationError[];
+  warnings: ValidationError[];
+  completedFields: string[];
+  missingFields: string[];
+}
+
+export interface FieldValidationRule {
+  field: string;
+  required: boolean;
+  type: 'string' | 'number' | 'boolean' | 'date' | 'enum' | 'array' | 'object';
+  min?: number;
+  max?: number;
+  minLength?: number;
+  maxLength?: number;
+  pattern?: RegExp;
+  enumValues?: (string | number)[];
+  customValidator?: (value: unknown) => boolean;
+  errorMessage: string;
+}
 
 // ============================================================================
 // RÈGLES DE VALIDATION PAR ÉTAPE
 // ============================================================================
 
-const STEP_VALIDATION_RULES: Record<number, ValidationRule[]> = {
-  // Étape 1: Informations administratives
-  1: [
-    {
-      id: "numero_dpe",
-      field: "numero_dpe",
-      required: true,
-      type: "string",
-      pattern: /^DPE-\d{2}-\d{3}-\d{3}-[A-Z]$/,
-      message: "Le numéro DPE doit être au format DPE-XX-XXX-XXX-X",
-    },
-    {
-      id: "date_visite",
-      field: "date_visite",
-      required: true,
-      type: "date",
-      message: "La date de visite est requise",
-    },
-    {
-      id: "proprietaire.nom",
-      field: "proprietaire.nom",
-      required: true,
-      type: "string",
-      minLength: 2,
-      maxLength: 255,
-      message: "Le nom du propriétaire est requis (2-255 caractères)",
-    },
-    {
-      id: "adresse_logement.adresse",
-      field: "adresse_logement.adresse",
-      required: true,
-      type: "string",
-      minLength: 5,
-      maxLength: 500,
-      message: "L'adresse du logement est requise (5-500 caractères)",
-    },
+const STEP_VALIDATION_RULES: Record<number, FieldValidationRule[]> = {
+  1: [ // Étape 1: Administratif
+    { field: 'administratif.date_visite_diagnostiqueur', required: true, type: 'date', errorMessage: 'Date de visite requise' },
+    { field: 'administratif.date_etablissement_dpe', required: true, type: 'date', errorMessage: 'Date d\'établissement requise' },
+    { field: 'administratif.nom_proprietaire', required: true, type: 'string', minLength: 2, maxLength: 200, errorMessage: 'Nom du propriétaire requis (2-200 caractères)' },
+    { field: 'administratif.diagnostiqueur.nom_diagnostiqueur', required: true, type: 'string', minLength: 2, maxLength: 100, errorMessage: 'Nom du diagnostiqueur requis' },
+    { field: 'administratif.diagnostiqueur.prenom_diagnostiqueur', required: true, type: 'string', minLength: 2, maxLength: 100, errorMessage: 'Prénom du diagnostiqueur requis' },
+    { field: 'administratif.diagnostiqueur.mail_diagnostiqueur', required: true, type: 'string', pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, errorMessage: 'Email du diagnostiqueur invalide' },
+    { field: 'administratif.diagnostiqueur.telephone_diagnostiqueur', required: true, type: 'string', pattern: /^0[1-9](\d{8})$/, errorMessage: 'Téléphone invalide (format français requis)' },
+    { field: 'administratif.diagnostiqueur.numero_certification_diagnostiqueur', required: true, type: 'string', minLength: 5, maxLength: 50, errorMessage: 'Numéro de certification requis' },
+    { field: 'administratif.geolocalisation.adresses.adresse_bien.adresse_brut', required: true, type: 'string', minLength: 5, errorMessage: 'Adresse du bien requise' },
+    { field: 'administratif.geolocalisation.adresses.adresse_bien.code_postal_brut', required: true, type: 'string', pattern: /^\d{5}$/, errorMessage: 'Code postal invalide (5 chiffres)' },
+    { field: 'administratif.geolocalisation.adresses.adresse_bien.nom_commune_brut', required: true, type: 'string', minLength: 2, errorMessage: 'Commune requise' },
   ],
-
-  // Étape 2: Caractéristiques générales
-  2: [
-    {
-      id: "type_batiment",
-      field: "type_batiment",
-      required: true,
-      type: "enum",
-      enumValues: ["maison", "appartement", "immeuble"],
-      message: "Le type de bâtiment est requis",
-    },
-    {
-      id: "periode_construction",
-      field: "periode_construction",
-      required: true,
-      type: "enum",
-      enumValues: [
-        "avant_1948",
-        "1948-1974",
-        "1975-1977",
-        "1978-1982",
-        "1983-1988",
-        "1989-2000",
-        "2001-2005",
-        "2006-2012",
-        "2013-2021",
-        "apres_2021",
-      ],
-      message: "La période de construction est requise",
-    },
-    {
-      id: "surface_habitable",
-      field: "surface_habitable",
-      required: true,
-      type: "number",
-      min: 1,
-      max: 10000,
-      message: "La surface habitable doit être comprise entre 1 et 10000 m²",
-    },
-    {
-      id: "nombre_niveaux",
-      field: "nombre_niveaux",
-      required: true,
-      type: "number",
-      min: 1,
-      max: 50,
-      message: "Le nombre de niveaux doit être compris entre 1 et 50",
-    },
+  2: [ // Étape 2: Caractéristiques générales
+    { field: 'logement.caracteristique_generale.annee_construction', required: true, type: 'number', min: 1000, max: new Date().getFullYear() + 1, errorMessage: 'Année de construction invalide' },
+    { field: 'logement.caracteristique_generale.enum_periode_construction_id', required: true, type: 'enum', enumValues: Object.values(EnumPeriodeConstruction).filter(v => typeof v === 'number'), errorMessage: 'Période de construction requise' },
+    { field: 'logement.caracteristique_generale.enum_methode_application_dpe_log_id', required: true, type: 'enum', enumValues: Object.values(EnumMethodeApplicationDpeLog).filter(v => typeof v === 'number'), errorMessage: 'Méthode d\'application DPE requise' },
+    { field: 'logement.caracteristique_generale.surface_habitable_logement', required: true, type: 'number', min: 1, max: 10000, errorMessage: 'Surface habitable invalide (1-10000 m²)' },
+    { field: 'logement.caracteristique_generale.nombre_niveau_immeuble', required: true, type: 'number', min: 1, max: 100, errorMessage: 'Nombre de niveaux immeuble invalide' },
+    { field: 'logement.caracteristique_generale.nombre_niveau_logement', required: true, type: 'number', min: 1, max: 100, errorMessage: 'Nombre de niveaux logement invalide' },
+    { field: 'logement.caracteristique_generale.hsp', required: true, type: 'number', min: 1.5, max: 10, errorMessage: 'Hauteur sous plafond invalide (1.5-10m)' },
+    { field: 'logement.meteo.enum_zone_climatique_id', required: true, type: 'enum', enumValues: Object.values(EnumZoneClimatique).filter(v => typeof v === 'number'), errorMessage: 'Zone climatique requise' },
   ],
-
-  // Étape 3: Murs
-  3: [
-    {
-      id: "murs",
-      field: "murs",
-      required: true,
-      type: "array",
-      minLength: 1,
-      message: "Au moins un mur doit être défini",
-    },
+  3: [ // Étape 3: Murs
+    { field: 'logement.enveloppe.mur_collection.mur', required: true, type: 'array', minLength: 1, errorMessage: 'Au moins un mur requis' },
   ],
-
-  // Étape 4: Baies vitrées
-  4: [
-    {
-      id: "baies_vitrees",
-      field: "baies_vitrees",
-      required: true,
-      type: "array",
-      minLength: 0,
-      message: "Les baies vitrées doivent être définies (peut être vide)",
-    },
+  4: [ // Étape 4: Baies vitrées
+    { field: 'logement.enveloppe.baie_vitree_collection.baie_vitree', required: false, type: 'array', errorMessage: 'Baies vitrées invalides' },
   ],
-
-  // Étape 5: Planchers bas
-  5: [
-    {
-      id: "planchers_bas",
-      field: "planchers_bas",
-      required: true,
-      type: "array",
-      minLength: 1,
-      message: "Au moins un plancher bas doit être défini",
-    },
+  5: [ // Étape 5: Planchers bas
+    { field: 'logement.enveloppe.plancher_bas_collection.plancher_bas', required: true, type: 'array', minLength: 1, errorMessage: 'Au moins un plancher bas requis' },
   ],
-
-  // Étape 6: Ponts thermiques
-  6: [
-    {
-      id: "ponts_thermiques",
-      field: "ponts_thermiques",
-      required: true,
-      type: "array",
-      minLength: 0,
-      message: "Les ponts thermiques doivent être définis (peut être vide)",
-    },
+  6: [ // Étape 6: Planchers haut
+    { field: 'logement.enveloppe.plancher_haut_collection.plancher_haut', required: true, type: 'array', minLength: 1, errorMessage: 'Au moins un plancher haut requis' },
   ],
-
-  // Étape 7: Ventilation
-  7: [
-    {
-      id: "ventilation.type_ventilation",
-      field: "ventilation.type_ventilation",
-      required: true,
-      type: "string",
-      message: "Le type de ventilation est requis",
-    },
+  7: [ // Étape 7: Ventilation
+    { field: 'logement.ventilation', required: true, type: 'object', errorMessage: 'Ventilation requise' },
   ],
-
-  // Étape 8: Chauffage
-  8: [
-    {
-      id: "chauffage.generateurs",
-      field: "chauffage.generateurs",
-      required: true,
-      type: "array",
-      minLength: 1,
-      message: "Au moins un générateur de chauffage doit être défini",
-    },
+  8: [ // Étape 8: Chauffage
+    { field: 'logement.installation_chauffage_collection.installation_chauffage', required: true, type: 'array', minLength: 1, errorMessage: 'Au moins une installation de chauffage requise' },
   ],
-
-  // Étape 9: ECS
-  9: [
-    {
-      id: "ecs.generateurs",
-      field: "ecs.generateurs",
-      required: true,
-      type: "array",
-      minLength: 1,
-      message: "Au moins un générateur d'ECS doit être défini",
-    },
+  9: [ // Étape 9: ECS
+    { field: 'logement.installation_ecs_collection.installation_ecs', required: true, type: 'array', minLength: 1, errorMessage: 'Au moins une installation ECS requise' },
   ],
-
-  // Étape 10-13: Optionnelles ou validation finale
-  10: [],
-  11: [],
-  12: [],
-  13: [],
 };
 
 // ============================================================================
-// RÈGLES DE COHÉRENCE MÉTIER
+// SERVICE VALIDATION
 // ============================================================================
 
-const BUSINESS_COHERENCE_RULES: CoherenceRule[] = [
-  {
-    id: "surface_positive",
-    description: "La surface habitable doit être positive",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
-      const surface = cg?.surface_habitable;
-      return typeof surface === "number" && surface > 0;
-    },
-    message: "La surface habitable doit être supérieure à 0 m²",
-    severity: "error",
-    applicableSteps: [2],
-  },
-  {
-    id: "surface_max",
-    description: "La surface habitable semble anormalement élevée",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
-      const surface = cg?.surface_habitable;
-      return typeof surface === "number" && surface < 10000;
-    },
-    message: "La surface habitable semble anormalement élevée (> 10000 m²)",
-    severity: "warning",
-    applicableSteps: [2],
-  },
-  {
-    id: "nombre_niveaux_coherent",
-    description: "Le nombre de niveaux doit être cohérent",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
-      const niveaux = cg?.nombre_niveaux;
-      return typeof niveaux === "number" && niveaux >= 1 && niveaux <= 50;
-    },
-    message: "Le nombre de niveaux doit être compris entre 1 et 50",
-    severity: "error",
-    applicableSteps: [2],
-  },
-  {
-    id: "baies_surface_coherente",
-    description: "La surface des baies ne doit pas dépasser la surface habitable",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const cg = d.caracteristiques_generales as Record<string, number> | undefined;
-      const surfaceHabitable = cg?.surface_habitable || 0;
-      const env = d.enveloppe as Record<string, Array<{ surface?: number }>> | undefined;
-      const baies = env?.baies_vitrees || [];
-      const surfaceBaies = baies.reduce((sum: number, b) => sum + (b.surface || 0), 0);
-      return surfaceBaies <= surfaceHabitable * 1.5;
-    },
-    message: "La surface totale des baies vitrées semble incohérente avec la surface habitable",
-    severity: "warning",
-    applicableSteps: [4],
-  },
-  {
-    id: "ventilation_q4pa_coherent",
-    description: "Le Q4Pa doit être cohérent avec le type de ventilation",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const inst = d.installations as Record<string, Record<string, number>> | undefined;
-      const q4pa = inst?.ventilation?.q4pa;
-      if (q4pa === undefined || q4pa === null) return true;
-      return q4pa >= 0.5 && q4pa <= 15;
-    },
-    message: "Le Q4Pa doit être compris entre 0.5 et 15 m³/(h·m²)",
-    severity: "error",
-    applicableSteps: [7],
-  },
-  {
-    id: "generateur_chauffage_age",
-    description: "L'âge du générateur de chauffage doit être cohérent",
-    check: (data: unknown): boolean => {
-      const d = data as Record<string, unknown>;
-      const inst = d.installations as Record<string, unknown> | undefined;
-      const chauffage = inst?.chauffage as Record<string, Array<Record<string, number>>> | undefined;
-      const generateurs = chauffage?.generateurs;
-      if (!Array.isArray(generateurs) || generateurs.length === 0) return true;
-      
-      const anneeInstall = generateurs[0]?.annee_installation;
-      if (!anneeInstall) return true;
-      
-      const currentYear = new Date().getFullYear();
-      return anneeInstall >= 1900 && anneeInstall <= currentYear;
-    },
-    message: "L'année d'installation du générateur de chauffage est incohérente",
-    severity: "error",
-    applicableSteps: [8],
-  },
-];
+export class ValidationService {
+  private static instance: ValidationService;
 
-export class ValidationService implements IValidationService {
-  private customRules: ValidationRule[] = [];
-  private customCoherenceRules: CoherenceRule[] = [];
+  private constructor() {}
 
-  /**
-   * Récupère une valeur imbriquée dans un objet
-   */
-  private getNestedValue(obj: unknown, path: string): unknown {
-    const keys = path.split(".");
-    let current: unknown = obj;
-
-    for (const key of keys) {
-      if (current === null || current === undefined) {
-        return undefined;
-      }
-      current = (current as Record<string, unknown>)[key];
+  static getInstance(): ValidationService {
+    if (!ValidationService.instance) {
+      ValidationService.instance = new ValidationService();
     }
-
-    return current;
+    return ValidationService.instance;
   }
 
-  /**
-   * Valide une règle sur une valeur
-   */
-  private validateRule(rule: ValidationRule, value: unknown, data: unknown): ValidationError | null {
-    // Vérification required
-    if (rule.required && (value === undefined || value === null || value === "")) {
-      return {
-        code: "required",
-        field: rule.field,
-        message: rule.message,
-        severity: "error",
-      };
-    }
-
-    // Si non requis et valeur vide, pas d'erreur
-    if (!rule.required && (value === undefined || value === null || value === "")) {
-      return null;
-    }
-
-    // Vérification du type
-    if (value !== undefined && value !== null) {
-      const actualType = Array.isArray(value) ? "array" : typeof value;
-      
-      if (rule.type === "date") {
-        const dateValue = value instanceof Date ? value : new Date(value as string);
-        if (isNaN(dateValue.getTime())) {
-          return {
-            code: "invalid_date",
-            field: rule.field,
-            message: `${rule.field} doit être une date valide`,
-            severity: "error",
-          };
-        }
-      } else if (rule.type !== actualType) {
-        return {
-          code: "invalid_type",
-          field: rule.field,
-          message: `${rule.field} doit être de type ${rule.type}`,
-          severity: "error",
-        };
-      }
-
-      // Vérification enum - traité comme string avec valeurs contraintes
-      if (rule.enumValues && rule.enumValues.length > 0) {
-        const strValue = String(value);
-        if (!rule.enumValues.map(String).includes(strValue)) {
-          return {
-            code: "invalid_enum",
-            field: rule.field,
-            message: `${rule.field} doit être l'une des valeurs: ${String(rule.enumValues.join(", "))}`,
-            severity: "error",
-          };
-        }
-      }
-
-      // Vérification number (min/max)
-      if (rule.type === "number" && typeof value === "number") {
-        if (rule.min !== undefined && value < rule.min) {
-          return {
-            code: "min_value",
-            field: rule.field,
-            message: `${rule.field} doit être supérieur ou égal à ${rule.min}`,
-            severity: "error",
-          };
-        }
-        if (rule.max !== undefined && value > rule.max) {
-          return {
-            code: "max_value",
-            field: rule.field,
-            message: `${rule.field} doit être inférieur ou égal à ${rule.max}`,
-            severity: "error",
-          };
-        }
-      }
-
-      // Vérification string (minLength/maxLength/pattern)
-      if (rule.type === "string" && typeof value === "string") {
-        if (rule.minLength !== undefined && value.length < rule.minLength) {
-          return {
-            code: "min_length",
-            field: rule.field,
-            message: `${rule.field} doit contenir au moins ${rule.minLength} caractères`,
-            severity: "error",
-          };
-        }
-        if (rule.maxLength !== undefined && value.length > rule.maxLength) {
-          return {
-            code: "max_length",
-            field: rule.field,
-            message: `${rule.field} doit contenir au plus ${rule.maxLength} caractères`,
-            severity: "error",
-          };
-        }
-        if (rule.pattern && !rule.pattern.test(value)) {
-          return {
-            code: "pattern_mismatch",
-            field: rule.field,
-            message: rule.message,
-            severity: "error",
-          };
-        }
-      }
-
-      // Vérification array (minLength)
-      if (rule.type === "array" && Array.isArray(value)) {
-        if (rule.minLength !== undefined && value.length < rule.minLength) {
-          return {
-            code: "min_items",
-            field: rule.field,
-            message: `${rule.field} doit contenir au moins ${rule.minLength} élément(s)`,
-            severity: "error",
-          };
-        }
-      }
-
-      // Validateur personnalisé
-      if (rule.customValidator) {
-        const customError = rule.customValidator(value, data);
-        if (customError) {
-          return customError;
-        }
-      }
-    }
-
-    return null;
-  }
+  // ============================================================================
+  // VALIDATION COMPLÈTE
+  // ============================================================================
 
   /**
-   * Valide un DPE complet ou partiel
+   * Valide l'intégralité d'un document DPE
    */
-  validate(dpeData: unknown, options: ValidationOptions = {}): ValidationResult {
+  validateDocument(document: DPEDocument): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];
-    const completedSteps: number[] = [];
 
-    const { context, includeWarnings = true, stopOnFirstError = false } = options;
-
-    // Détermine les étapes à valider
-    const stepsToValidate = context?.step 
-      ? [context.step] 
-      : Array.from({ length: 13 }, (_, i) => i + 1);
-
-    // Valide chaque étape
-    for (const step of stepsToValidate) {
-      const stepRules = this.getRulesForStep(step);
-      let stepValid = true;
-
-      for (const rule of stepRules) {
-        const value = this.getNestedValue(dpeData, rule.field);
-        const error = this.validateRule(rule, value, dpeData);
-
-        if (error) {
-          stepValid = false;
-          errors.push({ ...error, step });
-          
-          if (stopOnFirstError) {
-            break;
-          }
-        }
-      }
-
-      // Vérifie les règles de cohérence pour cette étape
-      const coherenceRules = this.getCoherenceRulesForStep(step);
-      for (const rule of coherenceRules) {
-        const isValid = rule.check(dpeData);
-        
-        if (!isValid) {
-          const error: ValidationError = {
-            code: rule.id,
-            field: "coherence",
-            message: rule.message,
-            severity: rule.severity,
-            step,
-          };
-
-          if (rule.severity === "error") {
-            stepValid = false;
-            errors.push(error);
-          } else if (includeWarnings) {
-            warnings.push(error);
-          }
-        }
-      }
-
-      if (stepValid) {
-        completedSteps.push(step);
-      }
-
-      if (stopOnFirstError && errors.length > 0) {
-        break;
-      }
+    // Validation de toutes les étapes
+    for (let step = 1; step <= 13; step++) {
+      const stepResult = this.validateStep(document, step);
+      errors.push(...stepResult.errors);
+      warnings.push(...stepResult.warnings);
     }
+
+    // Validation des contraintes de cohérence
+    const coherenceResult = this.validateCoherence(document);
+    errors.push(...coherenceResult.errors);
+    warnings.push(...coherenceResult.warnings);
 
     return {
       valid: errors.length === 0,
       errors,
       warnings,
-      completedSteps,
-      currentStep: context?.step ?? Math.max(...completedSteps, 0) + 1,
+      completedSteps: this.getCompletedSteps(document),
+      currentStep: this.getCurrentStep(document),
     };
   }
 
   /**
-   * Valide une étape spécifique du wizard
+   * Valide une étape spécifique
    */
-  validateStep(step: number, data: unknown): ValidationResult {
-    return this.validate(data, { context: { step }, includeWarnings: true });
+  validateStep(document: DPEDocument, step: number): StepValidationResult {
+    const errors: ValidationError[] = [];
+    const warnings: ValidationError[] = [];
+    const completedFields: string[] = [];
+    const missingFields: string[] = [];
+
+    const rules = STEP_VALIDATION_RULES[step];
+    if (!rules) {
+      return { step, valid: true, errors, warnings, completedFields, missingFields };
+    }
+
+    for (const rule of rules) {
+      const value = this.getNestedValue(document, rule.field);
+      const fieldResult = this.validateField(value, rule);
+
+      if (fieldResult.valid) {
+        completedFields.push(rule.field);
+      } else {
+        missingFields.push(rule.field);
+        errors.push({
+          code: `STEP_${step}_${rule.field.replace(/\./g, '_').toUpperCase()}`,
+          field: rule.field,
+          message: fieldResult.errorMessage || rule.errorMessage,
+          severity: 'error',
+          step,
+        });
+      }
+    }
+
+    // Validation spécifique selon l'étape
+    const specificResult = this.validateStepSpecific(document, step);
+    errors.push(...specificResult.errors);
+    warnings.push(...specificResult.warnings);
+
+    return {
+      step,
+      valid: errors.length === 0,
+      errors,
+      warnings,
+      completedFields,
+      missingFields,
+    };
   }
 
   /**
    * Valide un champ spécifique
    */
-  validateField(field: string, value: unknown, data?: unknown): ValidationError | null {
-    // Cherche la règle correspondante
+  validateFieldValue(document: DPEDocument, fieldPath: string): { valid: boolean; error?: ValidationError } {
+    // Trouver la règle correspondante
     for (const stepRules of Object.values(STEP_VALIDATION_RULES)) {
-      const rule = stepRules.find((r) => r.field === field);
+      const rule = stepRules.find(r => r.field === fieldPath);
       if (rule) {
-        return this.validateRule(rule, value, data ?? {});
+        const value = this.getNestedValue(document, fieldPath);
+        const result = this.validateField(value, rule);
+        if (!result.valid) {
+          return {
+            valid: false,
+            error: {
+              code: `INVALID_${fieldPath.replace(/\./g, '_').toUpperCase()}`,
+              field: fieldPath,
+              message: result.errorMessage || rule.errorMessage,
+              severity: 'error',
+            },
+          };
+        }
+        return { valid: true };
       }
     }
 
-    // Cherche dans les règles personnalisées
-    const customRule = this.customRules.find((r) => r.field === field);
-    if (customRule) {
-      return this.validateRule(customRule, value, data ?? {});
+    return { valid: true };
+  }
+
+  // ============================================================================
+  // VALIDATION COHÉRENCE
+  // ============================================================================
+
+  /**
+   * Valide les contraintes de cohérence métier
+   */
+  validateCoherence(document: DPEDocument): { errors: ValidationError[]; warnings: ValidationError[] } {
+    const errors: ValidationError[] = [];
+    const warnings: ValidationError[] = [];
+
+    // Surface habitable positive
+    const surfaceHabitable = document.logement?.caracteristique_generale?.surface_habitable_logement;
+    if (surfaceHabitable !== undefined && surfaceHabitable <= 0) {
+      errors.push({
+        code: 'COHERENCE_SURFACE_NEGATIVE',
+        field: 'logement.caracteristique_generale.surface_habitable_logement',
+        message: 'La surface habitable doit être positive',
+        severity: 'error',
+      });
     }
 
-    // Aucune règle trouvée, considère comme valide
-    return null;
+    // Surface habitable anormalement élevée
+    if (surfaceHabitable && surfaceHabitable > 1000) {
+      warnings.push({
+        code: 'COHERENCE_SURFACE_ELEVÉE',
+        field: 'logement.caracteristique_generale.surface_habitable_logement',
+        message: 'La surface habitable semble anormalement élevée (> 1000 m²)',
+        severity: 'warning',
+      });
+    }
+
+    // Cohérence nombre de niveaux
+    const niveauxImmeuble = document.logement?.caracteristique_generale?.nombre_niveau_immeuble;
+    const niveauxLogement = document.logement?.caracteristique_generale?.nombre_niveau_logement;
+    if (niveauxImmeuble && niveauxLogement && niveauxLogement > niveauxImmeuble) {
+      errors.push({
+        code: 'COHERENCE_NIVEAUX',
+        field: 'logement.caracteristique_generale.nombre_niveau_logement',
+        message: 'Le nombre de niveaux du logement ne peut pas dépasser celui de l\'immeuble',
+        severity: 'error',
+      });
+    }
+
+    // Cohérence dates
+    const dateVisite = document.administratif?.date_visite_diagnostiqueur;
+    const dateEtablissement = document.administratif?.date_etablissement_dpe;
+    if (dateVisite && dateEtablissement) {
+      const dateV = new Date(dateVisite);
+      const dateE = new Date(dateEtablissement);
+      if (dateE < dateV) {
+        errors.push({
+          code: 'COHERENCE_DATES',
+          field: 'administratif.date_etablissement_dpe',
+          message: 'La date d\'établissement ne peut pas être antérieure à la date de visite',
+          severity: 'error',
+        });
+      }
+    }
+
+    // Cohérence année construction / période
+    const anneeConstruction = document.logement?.caracteristique_generale?.annee_construction;
+    const periodeConstruction = document.logement?.caracteristique_generale?.enum_periode_construction_id;
+    if (anneeConstruction && periodeConstruction) {
+      const periodeCohérente = this.checkPeriodeConstruction(anneeConstruction, periodeConstruction);
+      if (!periodeCohérente) {
+        warnings.push({
+          code: 'COHERENCE_PERIODE',
+          field: 'logement.caracteristique_generale.enum_periode_construction_id',
+          message: 'L\'année de construction ne correspond pas à la période sélectionnée',
+          severity: 'warning',
+        });
+      }
+    }
+
+    return { errors, warnings };
+  }
+
+  // ============================================================================
+  // MÉTHODES UTILITAIRES
+  // ============================================================================
+
+  /**
+   * Récupère la valeur d'un champ imbriqué
+   */
+  private getNestedValue(obj: unknown, path: string): unknown {
+    return path.split('.').reduce((acc: unknown, part: string) => {
+      if (acc && typeof acc === 'object') {
+        return (acc as Record<string, unknown>)[part];
+      }
+      return undefined;
+    }, obj);
   }
 
   /**
-   * Ajoute une règle de validation personnalisée
+   * Valide un champ selon sa règle
    */
-  addRule(rule: ValidationRule): void {
-    this.customRules.push(rule);
+  private validateField(value: unknown, rule: FieldValidationRule): { valid: boolean; errorMessage?: string } {
+    // Vérification requis
+    if (rule.required && (value === undefined || value === null || value === '')) {
+      return { valid: false, errorMessage: `${rule.field} est requis` };
+    }
+
+    // Si non requis et vide, c'est valide
+    if (!rule.required && (value === undefined || value === null || value === '')) {
+      return { valid: true };
+    }
+
+    // Validation par type
+    switch (rule.type) {
+      case 'string':
+        if (typeof value !== 'string') {
+          return { valid: false, errorMessage: `${rule.field} doit être une chaîne` };
+        }
+        if (rule.minLength && value.length < rule.minLength) {
+          return { valid: false, errorMessage: `${rule.field} doit avoir au moins ${rule.minLength} caractères` };
+        }
+        if (rule.maxLength && value.length > rule.maxLength) {
+          return { valid: false, errorMessage: `${rule.field} doit avoir au plus ${rule.maxLength} caractères` };
+        }
+        if (rule.pattern && !rule.pattern.test(value)) {
+          return { valid: false, errorMessage: `${rule.field} format invalide` };
+        }
+        break;
+
+      case 'number':
+        if (typeof value !== 'number' || isNaN(value)) {
+          return { valid: false, errorMessage: `${rule.field} doit être un nombre` };
+        }
+        if (rule.min !== undefined && value < rule.min) {
+          return { valid: false, errorMessage: `${rule.field} doit être ≥ ${rule.min}` };
+        }
+        if (rule.max !== undefined && value > rule.max) {
+          return { valid: false, errorMessage: `${rule.field} doit être ≤ ${rule.max}` };
+        }
+        break;
+
+      case 'date':
+        if (typeof value !== 'string' || isNaN(Date.parse(value))) {
+          return { valid: false, errorMessage: `${rule.field} doit être une date valide` };
+        }
+        break;
+
+      case 'enum':
+        if (rule.enumValues && !rule.enumValues.includes(value as string | number)) {
+          return { valid: false, errorMessage: `${rule.field} valeur non valide` };
+        }
+        break;
+
+      case 'array':
+        if (!Array.isArray(value)) {
+          return { valid: false, errorMessage: `${rule.field} doit être un tableau` };
+        }
+        if (rule.minLength && value.length < rule.minLength) {
+          return { valid: false, errorMessage: `${rule.field} doit contenir au moins ${rule.minLength} élément(s)` };
+        }
+        break;
+    }
+
+    // Validateur personnalisé
+    if (rule.customValidator && !rule.customValidator(value)) {
+      return { valid: false, errorMessage: `${rule.field} validation personnalisée échouée` };
+    }
+
+    return { valid: true };
   }
 
   /**
-   * Ajoute une règle de cohérence
+   * Validation spécifique par étape
    */
-  addCoherenceRule(rule: CoherenceRule): void {
-    this.customCoherenceRules.push(rule);
+  private validateStepSpecific(document: DPEDocument, step: number): { errors: ValidationError[]; warnings: ValidationError[] } {
+    const errors: ValidationError[] = [];
+    const warnings: ValidationError[] = [];
+
+    switch (step) {
+      case 3: // Murs
+        this.validateMurs(document, errors, warnings);
+        break;
+      case 4: // Baies vitrées
+        this.validateBaiesVitrees(document, errors, warnings);
+        break;
+      case 5: // Planchers bas
+        this.validatePlanchersBas(document, errors);
+        break;
+      case 6: // Planchers haut
+        this.validatePlanchersHaut(document, errors);
+        break;
+    }
+
+    return { errors, warnings };
   }
 
-  /**
-   * Récupère les règles pour une étape
-   */
-  getRulesForStep(step: number): ValidationRule[] {
-    const baseRules = STEP_VALIDATION_RULES[step] ?? [];
-    return [...baseRules, ...this.customRules];
+  private validateMurs(document: DPEDocument, errors: ValidationError[], warnings: ValidationError[]): void {
+    const murs = document.logement?.enveloppe?.mur_collection?.mur;
+    if (!murs) return;
+
+    const murArray = Array.isArray(murs) ? murs : [murs];
+    let surfaceTotale = 0;
+
+    for (let i = 0; i < murArray.length; i++) {
+      const mur = murArray[i];
+      const surface = mur.donnee_entree?.surface_paroi_opaque;
+      if (surface <= 0) {
+        errors.push({
+          code: `MUR_${i}_SURFACE_INVALIDE`,
+          field: `logement.enveloppe.mur_collection.mur[${i}].donnee_entree.surface_paroi_opaque`,
+          message: `Le mur ${i + 1} doit avoir une surface positive`,
+          severity: 'error',
+        });
+      }
+      surfaceTotale += surface || 0;
+    }
+
+    // Vérification surface totale des murs vs surface habitable
+    const surfaceHabitable = document.logement?.caracteristique_generale?.surface_habitable_logement;
+    if (surfaceHabitable && surfaceTotale > surfaceHabitable * 5) {
+      warnings.push({
+        code: 'MURS_SURFACE_TOTALE_ELEVEE',
+        field: 'logement.enveloppe.mur_collection.mur',
+        message: 'La surface totale des murs semble anormalement élevée par rapport à la surface habitable',
+        severity: 'warning',
+      });
+    }
   }
 
-  /**
-   * Récupère les règles de cohérence pour une étape
-   */
-  private getCoherenceRulesForStep(step: number): CoherenceRule[] {
-    const baseRules = BUSINESS_COHERENCE_RULES.filter(
-      (r) => !r.applicableSteps || r.applicableSteps.includes(step)
-    );
-    const customRules = this.customCoherenceRules.filter(
-      (r) => !r.applicableSteps || r.applicableSteps.includes(step)
-    );
-    return [...baseRules, ...customRules];
+  private validateBaiesVitrees(document: DPEDocument, errors: ValidationError[], warnings: ValidationError[]): void {
+    const baies = document.logement?.enveloppe?.baie_vitree_collection?.baie_vitree;
+    if (!baies) return;
+
+    const baieArray = Array.isArray(baies) ? baies : [baies];
+    let surfaceTotale = 0;
+
+    for (let i = 0; i < baieArray.length; i++) {
+      const baie = baieArray[i];
+      const surface = baie.donnee_entree?.surface_totale_baie;
+      if (surface <= 0) {
+        errors.push({
+          code: `BAIE_${i}_SURFACE_INVALIDE`,
+          field: `logement.enveloppe.baie_vitree_collection.baie_vitree[${i}].donnee_entree.surface_totale_baie`,
+          message: `La baie vitrée ${i + 1} doit avoir une surface positive`,
+          severity: 'error',
+        });
+      }
+      surfaceTotale += surface || 0;
+    }
+
+    // Ratio baies / surface habitable
+    const surfaceHabitable = document.logement?.caracteristique_generale?.surface_habitable_logement;
+    if (surfaceHabitable && surfaceTotale > surfaceHabitable * 1.5) {
+      warnings.push({
+        code: 'BAIES_SURFACE_TOTALE_ELEVEE',
+        field: 'logement.enveloppe.baie_vitree_collection.baie_vitree',
+        message: 'La surface totale des baies vitrées semble anormalement élevée',
+        severity: 'warning',
+      });
+    }
   }
 
-  /**
-   * Vérifie si une étape est complète
-   */
-  isStepComplete(step: number, data: unknown): boolean {
-    const result = this.validateStep(step, data);
-    return result.valid;
+  private validatePlanchersBas(document: DPEDocument, errors: ValidationError[]): void {
+    const planchers = document.logement?.enveloppe?.plancher_bas_collection?.plancher_bas;
+    if (!planchers) return;
+
+    const plancherArray = Array.isArray(planchers) ? planchers : [planchers];
+
+    for (let i = 0; i < plancherArray.length; i++) {
+      const plancher = plancherArray[i];
+      const surface = plancher.donnee_entree?.surface_paroi_opaque;
+      if (surface <= 0) {
+        errors.push({
+          code: `PLANCHER_BAS_${i}_SURFACE_INVALIDE`,
+          field: `logement.enveloppe.plancher_bas_collection.plancher_bas[${i}].donnee_entree.surface_paroi_opaque`,
+          message: `Le plancher bas ${i + 1} doit avoir une surface positive`,
+          severity: 'error',
+        });
+      }
+    }
   }
 
-  /**
-   * Calcule la progression globale
-   */
-  calculateProgress(data: unknown): number {
-    const result = this.validate(data);
-    const completedSteps = result.completedSteps.length;
-    const totalSteps = 13;
-    return Math.round((completedSteps / totalSteps) * 100);
+  private validatePlanchersHaut(document: DPEDocument, errors: ValidationError[]): void {
+    const planchers = document.logement?.enveloppe?.plancher_haut_collection?.plancher_haut;
+    if (!planchers) return;
+
+    const plancherArray = Array.isArray(planchers) ? planchers : [planchers];
+
+    for (let i = 0; i < plancherArray.length; i++) {
+      const plancher = plancherArray[i];
+      const surface = plancher.donnee_entree?.surface_paroi_opaque;
+      if (surface <= 0) {
+        errors.push({
+          code: `PLANCHER_HAUT_${i}_SURFACE_INVALIDE`,
+          field: `logement.enveloppe.plancher_haut_collection.plancher_haut[${i}].donnee_entree.surface_paroi_opaque`,
+          message: `Le plancher haut ${i + 1} doit avoir une surface positive`,
+          severity: 'error',
+        });
+      }
+    }
+  }
+
+  private checkPeriodeConstruction(annee: number, periode: EnumPeriodeConstruction): boolean {
+    const periodes: Record<EnumPeriodeConstruction, [number, number]> = {
+      [EnumPeriodeConstruction.AVANT_1948]: [0, 1947],
+      [EnumPeriodeConstruction.PERIODE_1948_1974]: [1948, 1974],
+      [EnumPeriodeConstruction.PERIODE_1975_1977]: [1975, 1977],
+      [EnumPeriodeConstruction.PERIODE_1978_1982]: [1978, 1982],
+      [EnumPeriodeConstruction.PERIODE_1983_1988]: [1983, 1988],
+      [EnumPeriodeConstruction.PERIODE_1989_2000]: [1989, 2000],
+      [EnumPeriodeConstruction.PERIODE_2001_2005]: [2001, 2005],
+      [EnumPeriodeConstruction.PERIODE_2006_2012]: [2006, 2012],
+      [EnumPeriodeConstruction.PERIODE_2013_2021]: [2013, 2021],
+      [EnumPeriodeConstruction.APRES_2021]: [2022, 9999],
+    };
+
+    const [min, max] = periodes[periode] || [0, 9999];
+    return annee >= min && annee <= max;
+  }
+
+  private getCompletedSteps(document: DPEDocument): number[] {
+    const completed: number[] = [];
+    for (let step = 1; step <= 13; step++) {
+      const result = this.validateStep(document, step);
+      if (result.valid) {
+        completed.push(step);
+      }
+    }
+    return completed;
+  }
+
+  private getCurrentStep(document: DPEDocument): number {
+    for (let step = 1; step <= 13; step++) {
+      const result = this.validateStep(document, step);
+      if (!result.valid) {
+        return step;
+      }
+    }
+    return 13;
   }
 }
 
-// Export singleton factory
-let validationServiceInstance: ValidationService | null = null;
-
-export function createValidationService(): ValidationService {
-  if (!validationServiceInstance) {
-    validationServiceInstance = new ValidationService();
-  }
-  return validationServiceInstance;
-}
-
-export function getValidationService(): ValidationService | null {
-  return validationServiceInstance;
-}
+// Export singleton
+export const validationService = ValidationService.getInstance();

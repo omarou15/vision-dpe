@@ -1,317 +1,289 @@
 /**
- * XMLGeneratorService - Service de génération XML ADEME
- * Phase 1 - Module Administratif
- * 
- * Génère des documents XML conformes au schéma XSD ADEME v2.6
+ * Service de génération XML pour les DPE
+ * Conforme au format XSD ADEME v2.6
  */
 
-import {
-  IXMLGeneratorService,
-  XMLGenerationResult,
-  XMLGenerationStatus,
-  XMLValidationOptions,
-  XMLExportConfig,
-} from "../types/services";
-import {
-  DPEDocument,
-  XMLValidationResult,
-} from "../types/dpe";
-import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import { DPEDocument, XMLExportOptions, XMLValidationResult } from '../types';
+import { XMLBuilder } from 'fast-xml-parser';
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface XMLGenerationResult {
+  success: boolean;
+  xml?: string;
+  error?: string;
+}
+
+export interface XMLParseResult {
+  success: boolean;
+  document?: DPEDocument;
+  error?: string;
+}
 
 // ============================================================================
 // CONSTANTES XML
 // ============================================================================
 
-const XML_HEADER = `<?xml version="1.0" encoding="UTF-8"?>`;
-
-const XML_NAMESPACES = {
-  xmlns: "http://www.ademe.fr/dpe/2.6",
-  "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-  "xsi:schemaLocation": "http://www.ademe.fr/dpe/2.6 dpe_v2.6.xsd",
-};
-
-const DEFAULT_CONFIG: XMLExportConfig = {
-  version: "2.6",
-  format: "standard",
-  includePhotos: false,
-  includeSignatures: false,
-  encoding: "UTF-8",
-};
+const XML_DECLARATION = '<?xml version="1.0" encoding="UTF-8"?>';
+const XSD_NAMESPACE = 'http://www.ademe.fr/dpe';
+const XSD_SCHEMA_LOCATION = 'https://www.ademe.fr/dpe/schema/2.6/dpe.xsd';
 
 // ============================================================================
-// OPTIONS DE GÉNÉRATION XML
+// SERVICE XML GENERATOR
 // ============================================================================
 
-const XML_BUILDER_OPTIONS = {
-  attributeNamePrefix: "@_",
-  textNodeName: "#text",
-  ignoreAttributes: false,
-  format: true,
-  indentBy: "  ",
-  suppressEmptyNode: true,
-  suppressBooleanAttributes: false,
-  preserveOrder: true,
-};
+export class XMLGeneratorService {
+  private static instance: XMLGeneratorService;
+  private xmlBuilder: XMLBuilder;
 
-// ============================================================================
-// MAPPING DPE VERS XML
-// ============================================================================
+  private constructor() {
+    this.xmlBuilder = new XMLBuilder({
+      format: true,
+      indentBy: '  ',
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+      suppressEmptyNode: true,
+    });
+  }
 
-interface XMLAdministratif {
-  date_visite_diagnostiqueur: string;
-  date_etablissement_dpe: string;
-  nom_proprietaire: string;
-  enum_modele_dpe_id: number;
-  enum_version_id: string;
-  diagnostiqueur: XMLDiagnostiqueur;
-  geolocalisation: XMLGeolocalisation;
-}
+  static getInstance(): XMLGeneratorService {
+    if (!XMLGeneratorService.instance) {
+      XMLGeneratorService.instance = new XMLGeneratorService();
+    }
+    return XMLGeneratorService.instance;
+  }
 
-interface XMLDiagnostiqueur {
-  usr_logiciel_id: number;
-  version_logiciel: string;
-  nom_diagnostiqueur: string;
-  prenom_diagnostiqueur: string;
-  mail_diagnostiqueur: string;
-  telephone_diagnostiqueur: string;
-  adresse_diagnostiqueur: string;
-  entreprise_diagnostiqueur: string;
-  numero_certification_diagnostiqueur: string;
-  organisme_certificateur: string;
-}
+  // ============================================================================
+  // GÉNÉRATION XML
+  // ============================================================================
 
-interface XMLGeolocalisation {
-  adresses: {
-    adresse_proprietaire: XMLAdresse;
-    adresse_bien: XMLAdresse;
-  };
-}
+  /**
+   * Génère le XML complet d'un DPE
+   */
+  generateXML(document: DPEDocument, options?: XMLExportOptions): XMLGenerationResult {
+    const opts = options ?? { include_validation: true, format: 'standard' };
+    try {
+      // Validation préalable
+      if (opts.include_validation) {
+        const validationResult = this.validateDocumentStructure(document);
+        if (!validationResult.valid) {
+          return {
+            success: false,
+            error: `Document invalide: ${validationResult.schema_errors.join(', ')}`,
+          };
+        }
+      }
 
-interface XMLAdresse {
-  adresse_brut: string;
-  code_postal_brut: string;
-  nom_commune_brut: string;
-  label_brut: string;
-  label_brut_avec_complement: string;
-  enum_statut_geocodage_ban_id: number;
-  ban_date_appel: string;
-  ban_id: string;
-  ban_label: string;
-  ban_housenumber: string;
-  ban_street: string;
-  ban_citycode: string;
-  ban_postcode: string;
-  ban_city: string;
-  ban_type: string;
-  ban_score: number;
-  ban_x: number;
-  ban_y: number;
-}
+      // Construction de l'objet XML
+      const xmlObject = this.buildXMLObject(document);
 
-interface XMLLogement {
-  caracteristique_generale: XMLCaracteristiqueGenerale;
-  meteo: XMLMeteo;
-  enveloppe: XMLEnveloppe;
-  ventilation: XMLVentilation;
-}
+      // Génération XML
+      const xmlContent = this.xmlBuilder.build(xmlObject);
+      const fullXML = `${XML_DECLARATION}\n${xmlContent}`;
 
-interface XMLCaracteristiqueGenerale {
-  annee_construction: number;
-  enum_periode_construction_id: number;
-  enum_methode_application_dpe_log_id: number;
-  surface_habitable_logement: number;
-  nombre_niveau_immeuble: number;
-  nombre_niveau_logement: number;
-  hsp: number;
-}
-
-interface XMLMeteo {
-  enum_zone_climatique_id: number;
-  enum_classe_altitude_id: number;
-  batiment_materiaux_anciens: number;
-}
-
-interface XMLEnveloppe {
-  inertie: XMLInertie;
-  mur_collection: { mur: XMLMur[] };
-  baie_vitree_collection?: { baie_vitree: XMLBaieVitree[] };
-  plancher_bas_collection: { plancher_bas: XMLPlancherBas[] };
-  plancher_haut_collection: { plancher_haut: XMLPlancherHaut[] };
-}
-
-interface XMLInertie {
-  inertie_plancher_bas_lourd: number;
-  inertie_plancher_haut_lourd: number;
-  inertie_paroi_verticale_lourd: number;
-  enum_classe_inertie_id: number;
-}
-
-interface XMLMur {
-  donnee_entree: XMLMurDonneeEntree;
-  donnee_intermediaire: XMLMurDonneeIntermediaire;
-}
-
-interface XMLMurDonneeEntree {
-  reference: string;
-  enum_type_adjacence_id: number;
-  enum_orientation_id: number;
-  surface_paroi_opaque: number;
-  paroi_lourde: number;
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
-  paroi_ancienne: number;
-}
-
-interface XMLMurDonneeIntermediaire {
-  b: number;
-  umur: number;
-}
-
-interface XMLBaieVitree {
-  donnee_entree: XMLBaieVitreeDonneeEntree;
-}
-
-interface XMLBaieVitreeDonneeEntree {
-  reference: string;
-  enum_type_adjacence_id: number;
-  enum_orientation_id: number;
-  surface_totale_baie: number;
-}
-
-interface XMLPlancherBas {
-  donnee_entree: XMLPlancherBasDonneeEntree;
-  donnee_intermediaire: XMLPlancherBasDonneeIntermediaire;
-}
-
-interface XMLPlancherBasDonneeEntree {
-  reference: string;
-  enum_type_adjacence_id: number;
-  surface_paroi_opaque: number;
-  paroi_lourde: number;
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
-}
-
-interface XMLPlancherBasDonneeIntermediaire {
-  b: number;
-  upb: number;
-  upb_final: number;
-}
-
-interface XMLPlancherHaut {
-  donnee_entree: XMLPlancherHautDonneeEntree;
-  donnee_intermediaire: XMLPlancherHautDonneeIntermediaire;
-}
-
-interface XMLPlancherHautDonneeEntree {
-  reference: string;
-  enum_type_adjacence_id: number;
-  surface_paroi_opaque: number;
-  paroi_lourde: number;
-  enum_type_isolation_id: number;
-  enum_methode_saisie_u_id: number;
-}
-
-interface XMLPlancherHautDonneeIntermediaire {
-  b: number;
-  uph: number;
-}
-
-interface XMLVentilation {
-  // Structure simplifiée pour la Phase 1
-}
-
-interface XMLDPE {
-  version: string;
-  administratif: XMLAdministratif;
-  logement: XMLLogement;
-}
-
-export class XMLGeneratorService implements IXMLGeneratorService {
-  private config: XMLExportConfig;
-
-  constructor(config?: Partial<XMLExportConfig>) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+      return { success: true, xml: fullXML };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Erreur génération XML: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
   }
 
   /**
-   * Mappe un DPE vers la structure XML
+   * Génère uniquement la partie administratif en XML
    */
-  private mapDPEToXML(dpeData: DPEDocument): XMLDPE {
-    const { administratif, logement } = dpeData;
+  generateAdministratifXML(document: DPEDocument): XMLGenerationResult {
+    try {
+      const xmlObject = {
+        administratif: this.buildAdministratifNode(document.administratif),
+      };
+
+      const xmlContent = this.xmlBuilder.build(xmlObject);
+      return { success: true, xml: `${XML_DECLARATION}\n${xmlContent}` };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Erreur génération XML administratif: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
+
+  /**
+   * Génère uniquement la partie logement en XML
+   */
+  generateLogementXML(document: DPEDocument): XMLGenerationResult {
+    try {
+      const xmlObject = {
+        logement: this.buildLogementNode(document.logement),
+      };
+
+      const xmlContent = this.xmlBuilder.build(xmlObject);
+      return { success: true, xml: `${XML_DECLARATION}\n${xmlContent}` };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Erreur génération XML logement: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      };
+    }
+  }
+
+  // ============================================================================
+  // VALIDATION XML
+  // ============================================================================
+
+  /**
+   * Valide la structure du document avant génération XML
+   */
+  validateDocumentStructure(document: DPEDocument): XMLValidationResult {
+    const errors: string[] = [];
+
+    // Vérification des champs obligatoires
+    if (!document.administratif) {
+      errors.push('Section administratif manquante');
+    } else {
+      if (!document.administratif.date_visite_diagnostiqueur) {
+        errors.push('Date de visite manquante');
+      }
+      if (!document.administratif.date_etablissement_dpe) {
+        errors.push('Date d\'établissement manquante');
+      }
+      if (!document.administratif.nom_proprietaire) {
+        errors.push('Nom du propriétaire manquant');
+      }
+      if (!document.administratif.diagnostiqueur) {
+        errors.push('Informations du diagnostiqueur manquantes');
+      }
+    }
+
+    if (!document.logement) {
+      errors.push('Section logement manquante');
+    } else {
+      if (!document.logement.caracteristique_generale) {
+        errors.push('Caractéristiques générales manquantes');
+      }
+      if (!document.logement.enveloppe) {
+        errors.push('Enveloppe manquante');
+      }
+    }
 
     return {
-      version: "8.0.4",
-      administratif: {
-        date_visite_diagnostiqueur: administratif.date_visite_diagnostiqueur,
-        date_etablissement_dpe: administratif.date_etablissement_dpe,
-        nom_proprietaire: administratif.nom_proprietaire,
-        enum_modele_dpe_id: administratif.enum_modele_dpe_id,
-        enum_version_id: administratif.enum_version_id,
-        diagnostiqueur: {
-          usr_logiciel_id: administratif.diagnostiqueur.usr_logiciel_id,
-          version_logiciel: administratif.diagnostiqueur.version_logiciel,
-          nom_diagnostiqueur: administratif.diagnostiqueur.nom_diagnostiqueur,
-          prenom_diagnostiqueur: administratif.diagnostiqueur.prenom_diagnostiqueur,
-          mail_diagnostiqueur: administratif.diagnostiqueur.mail_diagnostiqueur,
-          telephone_diagnostiqueur: administratif.diagnostiqueur.telephone_diagnostiqueur,
-          adresse_diagnostiqueur: administratif.diagnostiqueur.adresse_diagnostiqueur,
-          entreprise_diagnostiqueur: administratif.diagnostiqueur.entreprise_diagnostiqueur,
-          numero_certification_diagnostiqueur: administratif.diagnostiqueur.numero_certification_diagnostiqueur,
-          organisme_certificateur: administratif.diagnostiqueur.organisme_certificateur,
-        },
-        geolocalisation: {
-          adresses: {
-            adresse_proprietaire: this.mapAdresseToXML(administratif.geolocalisation.adresses.adresse_proprietaire),
-            adresse_bien: this.mapAdresseToXML(administratif.geolocalisation.adresses.adresse_bien),
-          },
-        },
-      },
-      logement: {
-        caracteristique_generale: {
-          annee_construction: logement.caracteristique_generale.annee_construction ?? 0,
-          enum_periode_construction_id: logement.caracteristique_generale.enum_periode_construction_id ?? 0,
-          enum_methode_application_dpe_log_id: logement.caracteristique_generale.enum_methode_application_dpe_log_id ?? 0,
-          surface_habitable_logement: logement.caracteristique_generale.surface_habitable_logement ?? 0,
-          nombre_niveau_immeuble: logement.caracteristique_generale.nombre_niveau_immeuble ?? 0,
-          nombre_niveau_logement: logement.caracteristique_generale.nombre_niveau_logement ?? 0,
-          hsp: logement.caracteristique_generale.hsp ?? 0,
-        },
-        meteo: {
-          enum_zone_climatique_id: logement.meteo.enum_zone_climatique_id ?? 0,
-          enum_classe_altitude_id: logement.meteo.enum_classe_altitude_id ?? 0,
-          batiment_materiaux_anciens: logement.meteo.batiment_materiaux_anciens ?? 0,
-        },
-        enveloppe: {
-          inertie: {
-            inertie_plancher_bas_lourd: logement.enveloppe.inertie.inertie_plancher_bas_lourd ?? 0,
-            inertie_plancher_haut_lourd: logement.enveloppe.inertie.inertie_plancher_haut_lourd ?? 0,
-            inertie_paroi_verticale_lourd: logement.enveloppe.inertie.inertie_paroi_verticale_lourd ?? 0,
-            enum_classe_inertie_id: logement.enveloppe.inertie.enum_classe_inertie_id,
-          },
-          mur_collection: {
-            mur: this.mapMursToXML(logement.enveloppe.mur_collection),
-          },
-          baie_vitree_collection: logement.enveloppe.baie_vitree_collection
-            ? { baie_vitree: this.mapBaiesToXML(logement.enveloppe.baie_vitree_collection) }
-            : undefined,
-          plancher_bas_collection: {
-            plancher_bas: this.mapPlanchersBasToXML(logement.enveloppe.plancher_bas_collection),
-          },
-          plancher_haut_collection: {
-            plancher_haut: this.mapPlanchersHautToXML(logement.enveloppe.plancher_haut_collection),
-          },
-        },
-        ventilation: {},
-      },
+      valid: errors.length === 0,
+      schema_errors: errors,
+      coherence_errors: [],
     };
   }
 
   /**
-   * Mappe une adresse vers XML
+   * Valide le XML généré contre le schéma XSD
+   * Note: Nécessite une librairie de validation XSD côté serveur
    */
-  private mapAdresseToXML(adresse: DPEDocument["administratif"]["geolocalisation"]["adresses"]["adresse_bien"]): XMLAdresse {
+  async validateXMLAgainstSchema(xmlContent: string): Promise<XMLValidationResult> {
+    // Cette méthode serait implémentée côté serveur ou via API ADEME
+    // Pour le moment, on fait une validation basique
+    const errors: string[] = [];
+
+    // Vérification basique du XML
+    if (!xmlContent.includes('<?xml version=')) {
+      errors.push('Déclaration XML manquante');
+    }
+
+    if (!xmlContent.includes('<administratif>')) {
+      errors.push('Section administratif manquante');
+    }
+
+    if (!xmlContent.includes('<logement>')) {
+      errors.push('Section logement manquante');
+    }
+
     return {
+      valid: errors.length === 0,
+      schema_errors: errors,
+      coherence_errors: [],
+    };
+  }
+
+  // ============================================================================
+  // CONSTRUCTION DES NŒUDS XML
+  // ============================================================================
+
+  private buildXMLObject(document: DPEDocument): unknown {
+    const xmlObject: Record<string, unknown> = {
+      '@_version': document.version || '8.0.4',
+      '@_xmlns': XSD_NAMESPACE,
+      '@_xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+      '@_xsi:schemaLocation': XSD_SCHEMA_LOCATION,
+    };
+
+    // Section administratif
+    xmlObject.administratif = this.buildAdministratifNode(document.administratif);
+
+    // Section logement
+    xmlObject.logement = this.buildLogementNode(document.logement);
+
+    return { dpe: xmlObject };
+  }
+
+  private buildAdministratifNode(administratif: DPEDocument['administratif']): unknown {
+    return {
+      date_visite_diagnostiqueur: administratif.date_visite_diagnostiqueur,
+      date_etablissement_dpe: administratif.date_etablissement_dpe,
+      nom_proprietaire: administratif.nom_proprietaire,
+      ...(administratif.nom_proprietaire_installation_commune && {
+        nom_proprietaire_installation_commune: administratif.nom_proprietaire_installation_commune,
+      }),
+      enum_modele_dpe_id: administratif.enum_modele_dpe_id,
+      enum_version_id: administratif.enum_version_id,
+      diagnostiqueur: this.buildDiagnostiqueurNode(administratif.diagnostiqueur),
+      geolocalisation: this.buildGeolocalisationNode(administratif.geolocalisation),
+    };
+  }
+
+  private buildDiagnostiqueurNode(diagnostiqueur: DPEDocument['administratif']['diagnostiqueur']): unknown {
+    return {
+      usr_logiciel_id: diagnostiqueur.usr_logiciel_id,
+      version_logiciel: diagnostiqueur.version_logiciel,
+      nom_diagnostiqueur: diagnostiqueur.nom_diagnostiqueur,
+      prenom_diagnostiqueur: diagnostiqueur.prenom_diagnostiqueur,
+      mail_diagnostiqueur: diagnostiqueur.mail_diagnostiqueur,
+      telephone_diagnostiqueur: diagnostiqueur.telephone_diagnostiqueur,
+      adresse_diagnostiqueur: diagnostiqueur.adresse_diagnostiqueur,
+      entreprise_diagnostiqueur: diagnostiqueur.entreprise_diagnostiqueur,
+      numero_certification_diagnostiqueur: diagnostiqueur.numero_certification_diagnostiqueur,
+      organisme_certificateur: diagnostiqueur.organisme_certificateur,
+    };
+  }
+
+  private buildGeolocalisationNode(geolocalisation: DPEDocument['administratif']['geolocalisation']): unknown {
+    const node: Record<string, unknown> = {};
+
+    if (geolocalisation.numero_fiscal_local) {
+      node.numero_fiscal_local = geolocalisation.numero_fiscal_local;
+    }
+    if (geolocalisation.idpar) {
+      node.idpar = geolocalisation.idpar;
+    }
+    if (geolocalisation.immatriculation_copropriete) {
+      node.immatriculation_copropriete = geolocalisation.immatriculation_copropriete;
+    }
+
+    node.adresses = {
+      adresse_proprietaire: this.buildAdresseNode(geolocalisation.adresses.adresse_proprietaire),
+      adresse_bien: this.buildAdresseNode(geolocalisation.adresses.adresse_bien),
+      ...(geolocalisation.adresses.adresse_proprietaire_installation_commune && {
+        adresse_proprietaire_installation_commune: this.buildAdresseNode(
+          geolocalisation.adresses.adresse_proprietaire_installation_commune
+        ),
+      }),
+    };
+
+    return node;
+  }
+
+  private buildAdresseNode(adresse: DPEDocument['administratif']['geolocalisation']['adresses']['adresse_bien']): unknown {
+    const node: Record<string, unknown> = {
       adresse_brut: adresse.adresse_brut,
       code_postal_brut: adresse.code_postal_brut,
       nom_commune_brut: adresse.nom_commune_brut,
@@ -331,299 +303,249 @@ export class XMLGeneratorService implements IXMLGeneratorService {
       ban_x: adresse.ban_x,
       ban_y: adresse.ban_y,
     };
+
+    // Champs optionnels
+    if (adresse.compl_nom_residence) node.compl_nom_residence = adresse.compl_nom_residence;
+    if (adresse.compl_ref_batiment) node.compl_ref_batiment = adresse.compl_ref_batiment;
+    if (adresse.compl_etage_appartement) node.compl_etage_appartement = adresse.compl_etage_appartement;
+    if (adresse.compl_ref_cage_escalier) node.compl_ref_cage_escalier = adresse.compl_ref_cage_escalier;
+    if (adresse.compl_ref_logement) node.compl_ref_logement = adresse.compl_ref_logement;
+
+    return node;
   }
 
-  /**
-   * Mappe les murs vers XML
-   */
-  private mapMursToXML(murCollection: DPEDocument["logement"]["enveloppe"]["mur_collection"]): XMLMur[] {
-    const murs = Array.isArray(murCollection.mur) ? murCollection.mur : [murCollection.mur];
-    
-    return murs.map((mur) => ({
-      donnee_entree: {
-        reference: mur.donnee_entree.reference,
-        enum_type_adjacence_id: mur.donnee_entree.enum_type_adjacence_id,
-        enum_orientation_id: mur.donnee_entree.enum_orientation_id,
-        surface_paroi_opaque: mur.donnee_entree.surface_paroi_opaque,
-        paroi_lourde: mur.donnee_entree.paroi_lourde,
-        enum_type_isolation_id: mur.donnee_entree.enum_type_isolation_id,
-        enum_methode_saisie_u_id: mur.donnee_entree.enum_methode_saisie_u_id,
-        paroi_ancienne: mur.donnee_entree.enduit_isolant_paroi_ancienne ?? 0,
-      },
-      donnee_intermediaire: {
-        b: mur.donnee_intermediaire.b,
-        umur: mur.donnee_intermediaire.umur,
-      },
-    }));
-  }
+  private buildLogementNode(logement: DPEDocument['logement']): unknown {
+    const node: Record<string, unknown> = {
+      caracteristique_generale: this.buildCaracteristiqueGeneraleNode(logement.caracteristique_generale),
+      meteo: this.buildMeteoNode(logement.meteo),
+      enveloppe: this.buildEnveloppeNode(logement.enveloppe),
+      ventilation: this.buildVentilationNode(logement.ventilation),
+    };
 
-  /**
-   * Mappe les baies vitrées vers XML
-   */
-  private mapBaiesToXML(baieCollection: DPEDocument["logement"]["enveloppe"]["baie_vitree_collection"]): XMLBaieVitree[] {
-    if (!baieCollection) return [];
-    
-    const baies = Array.isArray(baieCollection.baie_vitree)
-      ? baieCollection.baie_vitree
-      : [baieCollection.baie_vitree];
-    
-    return baies.map((baie) => ({
-      donnee_entree: {
-        reference: baie.donnee_entree.reference,
-        enum_type_adjacence_id: baie.donnee_entree.enum_type_adjacence_id,
-        enum_orientation_id: baie.donnee_entree.enum_orientation_id,
-        surface_totale_baie: baie.donnee_entree.surface_totale_baie,
-      },
-    }));
-  }
-
-  /**
-   * Mappe les planchers bas vers XML
-   */
-  private mapPlanchersBasToXML(
-    plancherCollection: DPEDocument["logement"]["enveloppe"]["plancher_bas_collection"]
-  ): XMLPlancherBas[] {
-    if (!plancherCollection) return [];
-    
-    const planchers = Array.isArray(plancherCollection.plancher_bas)
-      ? plancherCollection.plancher_bas
-      : [plancherCollection.plancher_bas];
-    
-    return planchers.map((plancher) => ({
-      donnee_entree: {
-        reference: plancher.donnee_entree.reference,
-        enum_type_adjacence_id: plancher.donnee_entree.enum_type_adjacence_id,
-        surface_paroi_opaque: plancher.donnee_entree.surface_paroi_opaque,
-        paroi_lourde: plancher.donnee_entree.paroi_lourde,
-        enum_type_isolation_id: plancher.donnee_entree.enum_type_isolation_id,
-        enum_methode_saisie_u_id: plancher.donnee_entree.enum_methode_saisie_u_id,
-      },
-      donnee_intermediaire: {
-        b: plancher.donnee_intermediaire.b,
-        upb: plancher.donnee_intermediaire.upb,
-        upb_final: plancher.donnee_intermediaire.upb_final,
-      },
-    }));
-  }
-
-  /**
-   * Mappe les planchers haut vers XML
-   */
-  private mapPlanchersHautToXML(
-    plancherCollection: DPEDocument["logement"]["enveloppe"]["plancher_haut_collection"]
-  ): XMLPlancherHaut[] {
-    if (!plancherCollection) return [];
-    
-    const planchers = Array.isArray(plancherCollection.plancher_haut)
-      ? plancherCollection.plancher_haut
-      : [plancherCollection.plancher_haut];
-    
-    return planchers.map((plancher) => ({
-      donnee_entree: {
-        reference: plancher.donnee_entree.reference,
-        enum_type_adjacence_id: plancher.donnee_entree.enum_type_adjacence_id,
-        surface_paroi_opaque: plancher.donnee_entree.surface_paroi_opaque,
-        paroi_lourde: plancher.donnee_entree.paroi_lourde,
-        enum_type_isolation_id: plancher.donnee_entree.enum_type_isolation_id,
-        enum_methode_saisie_u_id: plancher.donnee_entree.enum_methode_saisie_u_id,
-      },
-      donnee_intermediaire: {
-        b: plancher.donnee_intermediaire.b,
-        uph: plancher.donnee_intermediaire.uph,
-      },
-    }));
-  }
-
-  /**
-   * Génère le XML ADEME à partir d'un DPE
-   */
-  generate(dpeData: DPEDocument, config?: Partial<XMLExportConfig>): XMLGenerationResult {
-    try {
-      // Évite l'erreur de variable non utilisée
-      void { ...this.config, ...config };
-      
-      // Mappe le DPE vers la structure XML
-      const xmlData = this.mapDPEToXML(dpeData);
-
-      // Crée le builder XML
-      const builder = new XMLBuilder({
-        ...XML_BUILDER_OPTIONS,
-        format: true,
-      });
-
-      // Construit le XML
-      const xmlContent = builder.build({
-        dpe: {
-          "@_version": xmlData.version,
-          ...XML_NAMESPACES,
-          administratif: xmlData.administratif,
-          logement: xmlData.logement,
-        },
-      });
-
-      const fullXml = `${XML_HEADER}\n${xmlContent}`;
-      const fileName = `DPE_${dpeData.administratif.nom_proprietaire.replace(/\s+/g, "_")}_${new Date().toISOString().split("T")[0]}.xml`;
-
-      return {
-        status: XMLGenerationStatus.SUCCESS,
-        xmlContent: fullXml,
-        fileName,
-        fileSize: Buffer.byteLength(fullXml, "utf-8"),
-        generatedAt: new Date().toISOString(),
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
-      
-      return {
-        status: XMLGenerationStatus.ERROR,
-        errors: [
-          {
-            code: "generation_error",
-            message: errorMessage,
-          },
-        ],
-      };
+    if (logement.installation_chauffage_collection) {
+      node.installation_chauffage_collection = this.buildInstallationChauffageCollectionNode(
+        logement.installation_chauffage_collection
+      );
     }
-  }
 
-  /**
-   * Génère le XML de manière asynchrone
-   */
-  async generateAsync(
-    dpeData: DPEDocument,
-    config?: Partial<XMLExportConfig>
-  ): Promise<XMLGenerationResult> {
-    // Pour la Phase 1, la génération est synchrone
-    // En Phase 2, pourrait être déléguée à un worker
-    return this.generate(dpeData, config);
-  }
-
-  /**
-   * Valide un XML généré
-   */
-  validate(xmlContent: string, options: XMLValidationOptions = {}): XMLValidationResult {
-    const errors: string[] = [];
-    const coherenceErrors: string[] = [];
-
-    try {
-      // Parse le XML pour vérifier la syntaxe
-      const parser = new XMLParser({
-        ignoreAttributes: false,
-        attributeNamePrefix: "@_",
-        parseAttributeValue: true,
-      });
-
-      const parsed = parser.parse(xmlContent);
-
-      // Vérifie la structure de base
-      if (!parsed.dpe) {
-        errors.push("Racine 'dpe' manquante");
-        return { valid: false, schema_errors: errors, coherence_errors: coherenceErrors };
-      }
-
-      // Vérifie les sections obligatoires
-      if (!parsed.dpe.administratif) {
-        errors.push("Section 'administratif' manquante");
-      }
-
-      if (!parsed.dpe.logement) {
-        errors.push("Section 'logement' manquante");
-      }
-
-      // Vérifications de cohérence basiques
-      if (options.checkCoherence) {
-        const admin = parsed.dpe.administratif;
-        if (admin) {
-          if (!admin.date_visite_diagnostiqueur) {
-            coherenceErrors.push("Date de visite manquante");
-          }
-          if (!admin.nom_proprietaire) {
-            coherenceErrors.push("Nom du propriétaire manquant");
-          }
-        }
-      }
-
-      return {
-        valid: errors.length === 0,
-        schema_errors: errors,
-        coherence_errors: coherenceErrors,
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur de parsing XML";
-      return {
-        valid: false,
-        schema_errors: [errorMessage],
-        coherence_errors: coherenceErrors,
-      };
+    if (logement.installation_ecs_collection) {
+      node.installation_ecs_collection = this.buildInstallationECSCollectionNode(logement.installation_ecs_collection);
     }
+
+    return node;
   }
 
-  /**
-   * Exporte le XML vers un fichier
-   * Note: Cette méthode est un stub pour la Phase 1
-   * En environnement Node.js, elle utiliserait fs
-   */
-  async exportToFile(
-    xmlContent: string,
-    fileName: string,
-    directory: string
-  ): Promise<{ success: boolean; path?: string; error?: string }> {
-    // Évite l'erreur de variable non utilisée
-    void xmlContent;
-    
-    // Pour la Phase 1, retourne un succès simulé
-    // En Phase 2, implémenter avec fs.writeFile
+  private buildCaracteristiqueGeneraleNode(cg: DPEDocument['logement']['caracteristique_generale']): unknown {
     return {
-      success: true,
-      path: `${directory}/${fileName}`,
+      annee_construction: cg.annee_construction,
+      enum_periode_construction_id: cg.enum_periode_construction_id,
+      enum_methode_application_dpe_log_id: cg.enum_methode_application_dpe_log_id,
+      surface_habitable_logement: cg.surface_habitable_logement,
+      nombre_niveau_immeuble: cg.nombre_niveau_immeuble,
+      nombre_niveau_logement: cg.nombre_niveau_logement,
+      hsp: cg.hsp,
     };
   }
 
+  private buildMeteoNode(meteo: DPEDocument['logement']['meteo']): unknown {
+    return {
+      enum_zone_climatique_id: meteo.enum_zone_climatique_id,
+      enum_classe_altitude_id: meteo.enum_classe_altitude_id,
+      batiment_materiaux_anciens: meteo.batiment_materiaux_anciens,
+    };
+  }
+
+  private buildEnveloppeNode(enveloppe: DPEDocument['logement']['enveloppe']): unknown {
+    return {
+      inertie: this.buildInertieNode(enveloppe.inertie),
+      mur_collection: this.buildMurCollectionNode(enveloppe.mur_collection),
+      baie_vitree_collection: this.buildBaieVitreeCollectionNode(enveloppe.baie_vitree_collection),
+      plancher_bas_collection: this.buildPlancherBasCollectionNode(enveloppe.plancher_bas_collection),
+      plancher_haut_collection: this.buildPlancherHautCollectionNode(enveloppe.plancher_haut_collection),
+    };
+  }
+
+  private buildInertieNode(inertie: DPEDocument['logement']['enveloppe']['inertie']): unknown {
+    return {
+      inertie_plancher_bas_lourd: inertie.inertie_plancher_bas_lourd,
+      inertie_plancher_haut_lourd: inertie.inertie_plancher_haut_lourd,
+      inertie_paroi_verticale_lourd: inertie.inertie_paroi_verticale_lourd,
+      enum_classe_inertie_id: inertie.enum_classe_inertie_id,
+    };
+  }
+
+  private buildMurCollectionNode(collection: DPEDocument['logement']['enveloppe']['mur_collection']): unknown {
+    const murs = Array.isArray(collection.mur) ? collection.mur : [collection.mur];
+    return {
+      mur: murs.map(mur => ({
+        donnee_entree: {
+          reference: mur.donnee_entree.reference,
+          ...(mur.donnee_entree.description && { description: mur.donnee_entree.description }),
+          enum_type_adjacence_id: mur.donnee_entree.enum_type_adjacence_id,
+          enum_orientation_id: mur.donnee_entree.enum_orientation_id,
+          surface_paroi_opaque: mur.donnee_entree.surface_paroi_opaque,
+          paroi_lourde: mur.donnee_entree.paroi_lourde,
+          paroi_ancienne: mur.donnee_entree.paroi_ancienne,
+          enum_type_isolation_id: mur.donnee_entree.enum_type_isolation_id,
+          enum_methode_saisie_u_id: mur.donnee_entree.enum_methode_saisie_u_id,
+          ...(mur.donnee_entree.tv_coef_reduction_deperdition_id && {
+            tv_coef_reduction_deperdition_id: mur.donnee_entree.tv_coef_reduction_deperdition_id,
+          }),
+          ...(mur.donnee_entree.surface_paroi_totale && {
+            surface_paroi_totale: mur.donnee_entree.surface_paroi_totale,
+          }),
+          ...(mur.donnee_entree.tv_umur0_id && { tv_umur0_id: mur.donnee_entree.tv_umur0_id }),
+          ...(mur.donnee_entree.tv_umur_id && { tv_umur_id: mur.donnee_entree.tv_umur_id }),
+          ...(mur.donnee_entree.epaisseur_structure && {
+            epaisseur_structure: mur.donnee_entree.epaisseur_structure,
+          }),
+          ...(mur.donnee_entree.enum_materiaux_structure_mur_id && {
+            enum_materiaux_structure_mur_id: mur.donnee_entree.enum_materiaux_structure_mur_id,
+          }),
+          ...(mur.donnee_entree.enum_methode_saisie_u0_id && {
+            enum_methode_saisie_u0_id: mur.donnee_entree.enum_methode_saisie_u0_id,
+          }),
+          ...(mur.donnee_entree.enum_type_doublage_id && {
+            enum_type_doublage_id: mur.donnee_entree.enum_type_doublage_id,
+          }),
+        },
+        donnee_intermediaire: {
+          b: mur.donnee_intermediaire.b,
+          umur: mur.donnee_intermediaire.umur,
+          ...(mur.donnee_intermediaire.umur0 && { umur0: mur.donnee_intermediaire.umur0 }),
+        },
+      })),
+    };
+  }
+
+  private buildBaieVitreeCollectionNode(
+    collection: DPEDocument['logement']['enveloppe']['baie_vitree_collection']
+  ): unknown {
+    if (!collection?.baie_vitree) return { baie_vitree: [] };
+
+    const baies = Array.isArray(collection.baie_vitree) ? collection.baie_vitree : [collection.baie_vitree];
+    return {
+      baie_vitree: baies.map(baie => ({
+        donnee_entree: {
+          reference: baie.donnee_entree.reference,
+          ...(baie.donnee_entree.description && { description: baie.donnee_entree.description }),
+          enum_type_adjacence_id: baie.donnee_entree.enum_type_adjacence_id,
+          enum_orientation_id: baie.donnee_entree.enum_orientation_id,
+          surface_totale_baie: baie.donnee_entree.surface_totale_baie,
+          ...(baie.donnee_entree.reference_paroi && { reference_paroi: baie.donnee_entree.reference_paroi }),
+        },
+        ...(baie.donnee_intermediaire && {
+          donnee_intermediaire: {
+            sw: baie.donnee_intermediaire.sw,
+            ubat: baie.donnee_intermediaire.ubat,
+          },
+        }),
+      })),
+    };
+  }
+
+  private buildPlancherBasCollectionNode(
+    collection: DPEDocument['logement']['enveloppe']['plancher_bas_collection']
+  ): unknown {
+    const planchers = Array.isArray(collection.plancher_bas) ? collection.plancher_bas : [collection.plancher_bas];
+    return {
+      plancher_bas: planchers.map(plancher => ({
+        donnee_entree: {
+          reference: plancher.donnee_entree.reference,
+          ...(plancher.donnee_entree.description && { description: plancher.donnee_entree.description }),
+          enum_type_adjacence_id: plancher.donnee_entree.enum_type_adjacence_id,
+          surface_paroi_opaque: plancher.donnee_entree.surface_paroi_opaque,
+          paroi_lourde: plancher.donnee_entree.paroi_lourde,
+          enum_type_isolation_id: plancher.donnee_entree.enum_type_isolation_id,
+          enum_methode_saisie_u_id: plancher.donnee_entree.enum_methode_saisie_u_id,
+          ...(plancher.donnee_entree.tv_upb0_id && { tv_upb0_id: plancher.donnee_entree.tv_upb0_id }),
+          ...(plancher.donnee_entree.tv_upb_id && { tv_upb_id: plancher.donnee_entree.tv_upb_id }),
+        },
+        donnee_intermediaire: {
+          b: plancher.donnee_intermediaire.b,
+          upb: plancher.donnee_intermediaire.upb,
+          upb_final: plancher.donnee_intermediaire.upb_final,
+        },
+      })),
+    };
+  }
+
+  private buildPlancherHautCollectionNode(
+    collection: DPEDocument['logement']['enveloppe']['plancher_haut_collection']
+  ): unknown {
+    const planchers = Array.isArray(collection.plancher_haut) ? collection.plancher_haut : [collection.plancher_haut];
+    return {
+      plancher_haut: planchers.map(plancher => ({
+        donnee_entree: {
+          reference: plancher.donnee_entree.reference,
+          ...(plancher.donnee_entree.description && { description: plancher.donnee_entree.description }),
+          enum_type_adjacence_id: plancher.donnee_entree.enum_type_adjacence_id,
+          surface_paroi_opaque: plancher.donnee_entree.surface_paroi_opaque,
+          paroi_lourde: plancher.donnee_entree.paroi_lourde,
+          enum_type_isolation_id: plancher.donnee_entree.enum_type_isolation_id,
+          enum_methode_saisie_u_id: plancher.donnee_entree.enum_methode_saisie_u_id,
+          ...(plancher.donnee_entree.tv_uph0_id && { tv_uph0_id: plancher.donnee_entree.tv_uph0_id }),
+          ...(plancher.donnee_entree.tv_uph_id && { tv_uph_id: plancher.donnee_entree.tv_uph_id }),
+        },
+        donnee_intermediaire: {
+          b: plancher.donnee_intermediaire.b,
+          uph: plancher.donnee_intermediaire.uph,
+        },
+      })),
+    };
+  }
+
+  private buildVentilationNode(ventilation: DPEDocument['logement']['ventilation']): unknown {
+    // Placeholder - à compléter selon XSD
+    return ventilation || {};
+  }
+
+  private buildInstallationChauffageCollectionNode(
+    collection: NonNullable<DPEDocument['logement']['installation_chauffage_collection']>
+  ): unknown {
+    const installations = Array.isArray(collection.installation_chauffage)
+      ? collection.installation_chauffage
+      : [collection.installation_chauffage];
+    return {
+      installation_chauffage: installations,
+    };
+  }
+
+  private buildInstallationECSCollectionNode(
+    collection: NonNullable<DPEDocument['logement']['installation_ecs_collection']>
+  ): unknown {
+    const installations = Array.isArray(collection.installation_ecs)
+      ? collection.installation_ecs
+      : [collection.installation_ecs];
+    return {
+      installation_ecs: installations,
+    };
+  }
+
+  // ============================================================================
+  // UTILITAIRES
+  // ============================================================================
+
   /**
-   * Parse un XML existant en objet DPE
+   * Échappe les caractères spéciaux XML
    */
-  parse(xmlContent: string): { success: boolean; data?: DPEDocument; errors?: string[] } {
-    try {
-      // Évite l'erreur de variable non utilisée
-      void xmlContent;
-      
-      // Pour la Phase 1, retourne un succès partiel
-      // Le mapping complet XML -> DPE sera implémenté en Phase 2
-      return {
-        success: true,
-        data: undefined, // À implémenter: mapping XML -> DPEDocument
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur de parsing";
-      return { success: false, errors: [errorMessage] };
-    }
+  escapeXml(str: string): string {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
   }
 
   /**
-   * Récupère la configuration par défaut
+   * Formate une date pour XML (ISO 8601)
    */
-  getDefaultConfig(): XMLExportConfig {
-    return { ...DEFAULT_CONFIG };
-  }
-
-  /**
-   * Vérifie si la version XML est supportée
-   */
-  isVersionSupported(version: string): boolean {
-    return version === "2.6" || version === "2.5";
+  formatDate(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toISOString().split('T')[0];
   }
 }
 
-// Export singleton factory
-let xmlGeneratorServiceInstance: XMLGeneratorService | null = null;
-
-export function createXMLGeneratorService(config?: Partial<XMLExportConfig>): XMLGeneratorService {
-  if (!xmlGeneratorServiceInstance) {
-    xmlGeneratorServiceInstance = new XMLGeneratorService(config);
-  }
-  return xmlGeneratorServiceInstance;
-}
-
-export function getXMLGeneratorService(): XMLGeneratorService | null {
-  return xmlGeneratorServiceInstance;
-}
+// Export singleton
+export const xmlGeneratorService = XMLGeneratorService.getInstance();
