@@ -16,6 +16,10 @@ import { getEtapeFromXpath, type ResultatValidation, type ResultatControle, type
 
 const ADEME_API_BASE = import.meta.env.VITE_ADEME_API_URL || "http://localhost:5000";
 
+// Mode validation ADEME (external = export XML Perrenoud, integrated = moteur CSTB)
+export const ADEME_VALIDATION_MODE = import.meta.env.VITE_ADEME_VALIDATION_MODE || "external";
+export const isAdemeIntegrated = () => ADEME_VALIDATION_MODE === "integrated";
+
 // ════════════════════════════════════════════════════════════
 // Types réponse API ADEME
 // ════════════════════════════════════════════════════════════
