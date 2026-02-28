@@ -1,86 +1,71 @@
-/**
- * Mocks pour les tests des services
- * Mock de Supabase et autres dépendances externes
- */
+import { vi } from 'vitest'
 
-import { User, Session, AuthError } from "@supabase/supabase-js";
+const mockSupabaseClient = {
+  auth: {
+    signInWithPassword: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+    signInWithOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+    verifyOtp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+    signUp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+    signOut: vi.fn().mockResolvedValue({ error: null }),
+    getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+    onAuthStateChange: vi.fn(() => ({
+      data: { subscription: { unsubscribe: vi.fn() } }
+    })),
+  },
+  from: vi.fn(() => ({
+    select: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    delete: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn(),
+    maybeSingle: vi.fn(),
+  })),
+}
 
-export const mockAuthUser: User = {
+// Fonction pour créer une copie fraîche du mock
+export function createMockSupabaseClient() {
+  return {
+    auth: {
+      signInWithPassword: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+      signInWithOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      verifyOtp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+      signUp: vi.fn().mockResolvedValue({ data: { user: null, session: null }, error: null }),
+      signOut: vi.fn().mockResolvedValue({ error: null }),
+      getUser: vi.fn().mockResolvedValue({ data: { user: null }, error: null }),
+      onAuthStateChange: vi.fn(() => ({
+        data: { subscription: { unsubscribe: vi.fn() } }
+      })),
+    },
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      insert: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn(),
+      maybeSingle: vi.fn(),
+    })),
+  }
+}
+
+// Mock data pour les tests
+export const mockAuthUser = {
   id: "user-123",
   email: "test@example.com",
-  user_metadata: {
-    full_name: "Test User",
-  },
-  app_metadata: {},
-  aud: "authenticated",
-  confirmation_sent_at: undefined,
-  confirmed_at: "2024-01-01T00:00:00Z",
-  created_at: "2024-01-01T00:00:00Z",
-  email_confirmed_at: "2024-01-01T00:00:00Z",
-  phone: "",
-  phone_confirmed_at: undefined,
-  recovery_sent_at: undefined,
-  new_email: undefined,
-  new_phone: undefined,
-  invited_at: undefined,
-  action_link: undefined,
-  email_change_sent_at: undefined,
-  phone_change_sent_at: undefined,
-  reauthentication_sent_at: undefined,
-  is_anonymous: false,
-  factors: [],
-  identities: [],
-  role: "authenticated",
-  updated_at: "2024-01-01T00:00:00Z",
-  last_sign_in_at: "2024-01-01T00:00:00Z",
-};
-
-export const mockSession: Session = {
-  access_token: "mock-access-token",
-  refresh_token: "mock-refresh-token",
-  expires_in: 3600,
-  expires_at: Math.floor(Date.now() / 1000) + 3600,
-  token_type: "bearer",
-  user: mockAuthUser,
-};
+  user_metadata: { full_name: "Test User" },
+}
 
 export const mockUserProfile = {
   id: "user-123",
+  email: "test@example.com",
   full_name: "Test User",
   company: "Test Company",
-  numero_dpe_diagnostiqueur: "DPE-123456",
-  phone: "0612345678",
-  email: "test@example.com",
-  created_at: "2024-01-01T00:00:00Z",
-  updated_at: "2024-01-01T00:00:00Z",
-};
+  numero_dpe_diagnostiqueur: "12345",
+}
 
-export const createMockSupabaseClient = () => {
-  return {
-    auth: {
-      signInWithPassword: jest.fn(),
-      signInWithOtp: jest.fn(),
-      verifyOtp: jest.fn(),
-      signOut: jest.fn(),
-      refreshSession: jest.fn(),
-      getUser: jest.fn(),
-      resetPasswordForEmail: jest.fn(),
-      updateUser: jest.fn(),
-      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
-    },
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn(),
-        })),
-      })),
-    })),
-  };
-};
+vi.mock('@supabase/supabase-js', () => ({
+  createClient: vi.fn(() => createMockSupabaseClient())
+}))
 
-export const mockAuthError: AuthError = {
-  name: "AuthError",
-  message: "Invalid credentials",
-  status: 400,
-  code: "invalid_credentials",
-};
+export { mockSupabaseClient }

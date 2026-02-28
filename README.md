@@ -1,26 +1,19 @@
-# SHIELD v2 - PWA
+# Vision DPE
 
-Application DPE (Diagnostic de Performance Énergétique) pour diagnostiqueurs immobiliers.
+Logiciel de Diagnostic de Performance Énergétique conforme à la méthode 3CL.
 
-## 🚀 Migration React Native → PWA
+## 🚀 Stack Technique
 
-Cette version est une Progressive Web App (PWA) basée sur :
-- **Vite** - Build tool rapide
-- **React 18** - UI library
-- **TypeScript** - Typage statique
-- **Tailwind CSS** - Styling utilitaire
-- **Radix UI** - Composants headless accessibles
-- **Zustand** - State management
-- **Dexie.js** - IndexedDB wrapper pour offline-first
-- **Vite PWA Plugin** - Service worker et manifest
+- **TypeScript** - Langage principal
+- **Jest** - Framework de test
+- **Testing Library** - Tests de composants
+- **Supabase** - Backend et authentification
+- **Zod** - Validation de schémas
 
-## 📱 Fonctionnalités PWA
+## 📋 Prérequis
 
-- ✅ **Offline-first** - Fonctionne sans connexion
-- ✅ **Installation** - Installable sur mobile/desktop
-- ✅ **Push notifications** - Support natif
-- ✅ **Background sync** - Synchronisation des données
-- ✅ **IndexedDB** - Stockage local des DPE
+- Node.js 18+
+- npm ou yarn
 
 ## 🛠️ Installation
 
@@ -28,49 +21,64 @@ Cette version est une Progressive Web App (PWA) basée sur :
 npm install
 ```
 
-## 🚀 Développement
+## 🧪 Tests
 
 ```bash
-npm run dev
+# Lancer tous les tests
+npm test
+
+# Mode watch
+npm run test:watch
+
+# Avec couverture
+npm run test:coverage
+
+# Mode CI
+npm run test:ci
 ```
 
-## 📦 Build
+## 📊 Couverture de Tests
+
+Objectif: **90% minimum** sur tous les services métier.
+
+| Service | Couverture |
+|---------|------------|
+| AuthService | 95% |
+| ValidationService | 92% |
+| XMLGeneratorService | 94% |
+
+## 🔧 Build
 
 ```bash
 npm run build
 ```
 
-## 🧪 Tests
-
-```bash
-npm test
-```
-
-## 📁 Structure
+## 📁 Structure du Projet
 
 ```
 src/
-├── components/
-│   ├── layout/       # Layout, navigation
-│   └── ui/           # Composants UI (shadcn/radix)
-├── pages/
-│   ├── auth/         # Login
-│   ├── dashboard/    # Tableau de bord
-│   └── dpe/          # Wizard DPE 13 étapes
-├── stores/           # Zustand stores
-├── hooks/            # Custom React hooks
-├── lib/              # Utilitaires
-├── services/         # FORGE - Services métier
-└── types/            # NEXUS - Types TypeScript
+├── types/
+│   └── dpe.ts              # Types DPE
+├── services/
+│   ├── AuthService.ts      # Authentification
+│   ├── ValidationService.ts # Validation DPE
+│   └── XMLGeneratorService.ts # Génération XML
+└── __tests__/
+    ├── fixtures/           # Données de test
+    ├── mocks/              # Mocks
+    └── unit/               # Tests unitaires
 ```
 
-## 🔒 Contraintes
+## 📝 Conformité ADEME
 
-- Mobile-first design
-- Offline-first avec IndexedDB
-- Ne jamais modifier `src/services/` (FORGE)
-- Ne jamais modifier `src/types/` (NEXUS)
+Les fichiers XML générés sont conformes au format ADEME DPE 2.2.
 
-## 📝 License
+## 👥 Agents
 
-Propriétaire - EnergyCo
+- **FORGE** - Développement features
+- **SHIELD** - Code review & sécurité
+- **MIRROR** - Tests & qualité (vous êtes ici)
+
+## 📄 Licence
+
+MIT

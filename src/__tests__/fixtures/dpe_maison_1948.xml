@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dpe xmlns="http://ademe.org/dpe" version="2.2">
+  <administratif>
+    <numero_dpe>DPE-2024-MAISON-001</numero_dpe>
+    <statut>signe</statut>
+    <date_visite_diagnostiqueur>2024-01-15T10:00:00Z</date_visite_diagnostiqueur>
+    <date_etablissement_dpe>2024-01-20T14:30:00Z</date_etablissement_dpe>
+  </administratif>
+  <logement>
+    <caracteristique_generale>
+      <type_batiment>maison</type_batiment>
+      <periode_construction>avant_1948</periode_construction>
+      <surface_habitable>95.00</surface_habitable>
+      <nombre_niveaux>2</nombre_niveaux>
+    </caracteristique_generale>
+    <climat>
+      <zone_climatique>H1</zone_climatique>
+      <altitude>moins_400m</altitude>
+    </climat>
+  </logement>
+  <performance_energetique>
+    <consommation_energie_finale>28500.00</consommation_energie_finale>
+    <consommation_energie_primaire>30000.00</consommation_energie_primaire>
+    <consommation_energie_primaire_m2>315.79</consommation_energie_primaire_m2>
+    <emission_ges>5200.00</emission_ges>
+    <emission_ges_m2>54.74</emission_ges_m2>
+    <classe_energie>G</classe_energie>
+    <classe_ges>G</classe_ges>
+  </performance_energetique>
+  <cout>
+    <chauffage>1850.00</chauffage>
+    <ecs>450.00</ecs>
+    <eclairage>80.00</eclairage>
+    <auxiliaires>40.00</auxiliaires>
+  </cout>
+</dpe>
