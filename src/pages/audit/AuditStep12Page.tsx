@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useProjetStore } from "@/store/projetStore";
 import * as syncService from "@/services/sync";
-import type { BilanEtatInitial, ConsommationParUsage, DeperditionsParPoste, EmissionsParUsage } from "@/types/steps/audit";
-import { calculerEtiquette, SEUILS_ETIQUETTE, type ClasseDpe } from "@/types/steps/audit";
-import { Card, Button, Alert } from "@/components/ui";
+import type { BilanEtatInitial, ConsommationParUsage, DeperditionsParPoste } from "@/types/steps/audit";
+import { calculerEtiquette, type ClasseDpe } from "@/types/steps/audit";
+import { Card, Button } from "@/components/ui";
 
 const ETIQUETTE_COLORS: Record<ClasseDpe, { bg: string; text: string; border: string }> = {
   A: { bg: "bg-green-500", text: "text-white", border: "border-green-600" },
@@ -98,7 +97,6 @@ function createBilanVide(): BilanEtatInitial {
 }
 
 export default function AuditStep12Page() {
-  const { t } = useTranslation();
   const { projetId } = useParams<{ projetId: string }>();
   const { activeProjet, loadProjet, completeStep } = useProjetStore();
   const [bilan, setBilan] = useState<BilanEtatInitial>(createBilanVide());
