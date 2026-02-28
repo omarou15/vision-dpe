@@ -4,16 +4,7 @@
  */
 
 // Types DPE principaux
-export {
-  EnumModeleDpe,
-  EnumVersionDpe,
-  EnumPeriodeConstruction,
-  EnumMethodeApplicationDpeLog,
-  EnumZoneClimatique,
-  EnumClasseAltitude,
-  EnumTypeAdjacence,
-  EnumOrientation,
-  EnumEtiquetteDpe,
+export type {
   DPEDocument,
   Administratif,
   Diagnostiqueur,
@@ -46,24 +37,55 @@ export {
   InstallationECSCollection,
   InstallationECS,
   Ventilation,
-  // ValidationError et ValidationResult sont exportés depuis validation.ts
   XMLExportOptions,
   XMLValidationResult,
 } from "./dpe";
 
-export * from "./tables-valeurs";
-
-// Exporte tout sauf ValidationRule qui est aussi dans services.ts
+// Enums DPE
 export {
-  CoherenceConstraint,
-  REQUIRED_FIELDS_BY_STEP,
-  COHERENCE_CONSTRAINTS,
+  EnumModeleDpe,
+  EnumVersionDpe,
+  EnumPeriodeConstruction,
+  EnumMethodeApplicationDpeLog,
+  EnumZoneClimatique,
+  EnumClasseAltitude,
+  EnumTypeAdjacence,
+  EnumOrientation,
+  EnumEtiquetteDpe,
+} from "./dpe";
+
+export type {
   ValidationError,
   ValidationResult,
   StepProgress,
   FormProgress,
+  CoherenceConstraint,
 } from "./validation";
 
-export * from "./api-ademe";
-export * from "./services";
-export * from "./utils";
+export {
+  REQUIRED_FIELDS_BY_STEP,
+  COHERENCE_CONSTRAINTS,
+} from "./validation";
+
+// Types des services
+export type {
+  AuthUser,
+  LoginCredentials,
+  OTPRequest,
+  OTPVerify,
+  AuthSession,
+  PasswordResetRequest,
+  PasswordUpdate,
+  AuthResult,
+  AuthError,
+  IAuthService,
+  ValidationRule,
+  ValidationContext,
+  ValidationOptions,
+  CoherenceRule,
+  IValidationService,
+  XMLGenerationResult,
+  XMLValidationOptions,
+  XMLExportConfig,
+  IXMLGeneratorService,
+} from "./services";
