@@ -9,6 +9,7 @@ import type {
   UpdateProjetInput,
   Projet,
 } from "@/types";
+import type { StepData } from "@/services/db";
 
 // ============================================================
 // CRÉER
@@ -343,7 +344,7 @@ export async function transformerEnDpe(projetId: string): Promise<void> {
 
 /** Convertit un Supabase row en LocalProjet */
 function supabaseToLocal(row: Projet): LocalProjet {
-  const data: Record<string, unknown> = {};
+  const data: Record<string, StepData> = {};
 
   for (const key of Object.keys(row)) {
     if (key.startsWith("data_step_")) {
