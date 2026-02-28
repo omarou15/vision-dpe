@@ -78,7 +78,7 @@ export default function Step3Page() {
     if (data.surface_habitable) setSurface(String(data.surface_habitable));
     if (data.hauteur_sous_plafond) setHsp(String(data.hauteur_sous_plafond));
     if (data.nombre_niveaux) setNiveaux(String(data.nombre_niveaux));
-    if (data.inertie) setInertie(data.inertie as string);
+    if (data.inertie) setInertie(data.inertie as "lourde" | "moyenne" | "legere");
     if (data.materiaux_anciens) setMateriauxAnciens(data.materiaux_anciens as boolean);
     if (data.presence_sous_sol) setSousSol(data.presence_sous_sol as boolean);
     if (data.position_appartement) setPosition(data.position_appartement as string);
@@ -251,7 +251,7 @@ export default function Step3Page() {
           <ChipGroup
             options={INERTIE_CHIPS}
             value={inertie}
-            onChange={setInertie}
+            onChange={(v) => setInertie(v as "lourde" | "moyenne" | "legere")}
           />
         </div>
       </Card>

@@ -103,7 +103,7 @@ export default function AuditStep20Page() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Taille</span>
-                <span className="font-medium">{formatSize(exportData.taille)}</span>
+                <span className="font-medium">{formatSize(exportData.taille || 0)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Version XSD</span>

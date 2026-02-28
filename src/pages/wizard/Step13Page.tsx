@@ -146,7 +146,7 @@ export default function Step13Page() {
                     </button>
                   )}
                 </div>
-                {controles.map((c) => <ControleCard key={c.code + c.xpath} c={c} />)}
+                {controles.map((c: any) => <ControleCard key={c.code + c.xpath} c={c} />)}
               </div>
             ))}
 

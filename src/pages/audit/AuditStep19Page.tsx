@@ -124,7 +124,7 @@ export default function AuditStep19Page() {
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {controles.map((c, i) => <ControleCard key={i} c={c} />)}
+                  {controles.map((c: any, i: number) => <ControleCard key={i} c={c} />)}
                 </div>
               </div>
             </Card>

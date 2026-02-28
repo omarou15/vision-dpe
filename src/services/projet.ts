@@ -351,7 +351,7 @@ function supabaseToLocal(row: Projet): LocalProjet {
       const stepKey = key.replace("data_", "");
       const val = row[key as keyof Projet];
       if (val && typeof val === "object") {
-        data[stepKey] = val;
+        data[stepKey] = val as StepData;
       }
     }
   }

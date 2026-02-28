@@ -32,7 +32,7 @@ export function usePWAUpdate(): PWAUpdateState {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    onRegisteredSW(swUrl, registration) {
+    onRegisteredSW(swUrl: string, registration: ServiceWorkerRegistration | undefined) {
       // Vérifie les mises à jour toutes les heures
       if (registration) {
         setInterval(
@@ -45,7 +45,7 @@ export function usePWAUpdate(): PWAUpdateState {
         );
       }
     },
-    onRegisterError(error) {
+    onRegisterError(error: Error) {
       console.error("SW registration error:", error);
     },
   });
