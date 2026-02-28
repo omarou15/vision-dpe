@@ -4,7 +4,7 @@ import { Shield, Mail, Lock, Loader2 } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Input } from '../../components/ui/Input'
 import { Label } from '../../components/ui/Label'
-import { useAuthStore } from '../../stores/authStore'
+import { useAuthStore } from '../../store/authStore'
 import { useToast } from '../../hooks/useToast'
 
 export function Login() {
