@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dpe xmlns="http://ademe.org/dpe" version="2.2">
+  <administratif>
+    <numero_dpe>DPE-2024-APP-002</numero_dpe>
+    <statut>signe</statut>
+    <date_visite_diagnostiqueur>2024-02-10T09:00:00Z</date_visite_diagnostiqueur>
+    <date_etablissement_dpe>2024-02-12T16:00:00Z</date_etablissement_dpe>
+  </administratif>
+  <logement>
+    <caracteristique_generale>
+      <type_batiment>appartement</type_batiment>
+      <periode_construction>1989_1999</periode_construction>
+      <surface_habitable>65.00</surface_habitable>
+      <nombre_niveaux>1</nombre_niveaux>
+    </caracteristique_generale>
+    <climat>
+      <zone_climatique>H2</zone_climatique>
+      <altitude>moins_400m</altitude>
+    </climat>
+  </logement>
+  <performance_energetique>
+    <consommation_energie_finale>7800.00</consommation_energie_finale>
+    <consommation_energie_primaire>8450.00</consommation_energie_primaire>
+    <consommation_energie_primaire_m2>130.00</consommation_energie_primaire_m2>
+    <emission_ges>1200.00</emission_ges>
+    <emission_ges_m2>18.46</emission_ges_m2>
+    <classe_energie>C</classe_energie>
+    <classe_ges>B</classe_ges>
+  </performance_energetique>
+  <cout>
+    <chauffage>580.00</chauffage>
+    <ecs>280.00</ecs>
+    <eclairage>60.00</eclairage>
+    <auxiliaires>30.00</auxiliaires>
+  </cout>
+</dpe>

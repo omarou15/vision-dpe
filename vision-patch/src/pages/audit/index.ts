@@ -1,0 +1,10 @@
+export { default as AuditStep12Page } from "./AuditStep12Page";
+export { default as AuditStep13Page } from "./AuditStep13Page";
+export { default as AuditStep14Page } from "./AuditStep14Page";
+export { default as AuditStep15Page } from "./AuditStep15Page";
+export { default as AuditStep16Page } from "./AuditStep16Page";
+export { default as AuditStep17Page } from "./AuditStep17Page";
+export { default as AuditStep18Page } from "./AuditStep18Page";
+export { default as AuditStep19Page } from "./AuditStep19Page";
+export { default as AuditStep20Page } from "./AuditStep20Page";
+export { auditRoutes } from "./routes";

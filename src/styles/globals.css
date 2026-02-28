@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* DM Sans from Google Fonts — à charger dans index.html */
+  :root {
+    --color-navy: #1b2a4a;
+    --color-blue: #2563eb;
+    --color-green: #059669;
+    --color-orange: #d97706;
+    --color-red: #dc2626;
+
+    /* DPE étiquettes */
+    --dpe-A: #009c6b;
+    --dpe-B: #52b153;
+    --dpe-C: #a0c853;
+    --dpe-D: #f1e94e;
+    --dpe-E: #f2a93b;
+    --dpe-F: #eb6232;
+    --dpe-G: #d42027;
+
+    /* Safe area pour PWA standalone */
+    --safe-top: env(safe-area-inset-top);
+    --safe-bottom: env(safe-area-inset-bottom);
+  }
+
+  html {
+    @apply antialiased;
+    -webkit-tap-highlight-color: transparent;
+    /* Empêcher le zoom sur iOS quand on focus un input */
+    touch-action: manipulation;
+  }
+
+  body {
+    @apply bg-white text-gray-900 font-sans text-base;
+    /* Safe area padding pour PWA standalone */
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+
+  /* Inputs : empêcher le zoom iOS sur focus (font-size >= 16px) */
+  input,
+  select,
+  textarea {
+    @apply text-base;
+  }
+
+  /* Scrollbar fine sur mobile */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded-full;
+  }
+}
+
+@layer components {
+  /* Container principal mobile-first */
+  .container-app {
+    @apply mx-auto w-full max-w-lg px-4;
+  }
+
+  /* Carte projet dashboard */
+  .card {
+    @apply rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md;
+  }
+
+  /* Bouton primaire */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 active:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Bouton secondaire */
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100;
+  }
+
+  /* Chip sélectionnable (entonnoir) */
+  .chip {
+    @apply inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-all;
+  }
+
+  .chip-active {
+    @apply border-blue-500 bg-blue-50 text-blue-700;
+  }
+
+  .chip-inactive {
+    @apply border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50;
+  }
+
+  /* Pastille statut */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-2xs font-semibold;
+  }
+}
+
+@layer utilities {
+  /* Utilitaire pour masquer le scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
