@@ -224,7 +224,7 @@ export function validerStep9(data: Partial<Step9Data>): ErreurValidation[] {
 
       // Vérifier variables requises
       for (const champ of regles.requis) {
-        const val = (gen as Record<string, unknown>)[champ];
+        const val = (gen as unknown as Record<string, unknown>)[champ];
         if (val === null || val === undefined || val === 0) {
           errs.push(err(
             "CH_REQ",
@@ -236,7 +236,7 @@ export function validerStep9(data: Partial<Step9Data>): ErreurValidation[] {
 
       // Vérifier variables interdites non remplies
       for (const champ of regles.interdits) {
-        const val = (gen as Record<string, unknown>)[champ];
+        const val = (gen as unknown as Record<string, unknown>)[champ];
         if (val !== null && val !== undefined && val !== 0 && val !== false) {
           errs.push(err(
             "CH_INT",
