@@ -1,9 +1,10 @@
+import '../mocks/supabase.mock'
 /**
  * Tests unitaires pour SyncService
  * Couverture: Synchronisation offline/online, file d'attente, conflits
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   SyncService,
   SyncStatus,
@@ -288,7 +289,7 @@ describe('SyncService', () => {
   // ============================================================================
   describe('onNetworkStatusChange', () => {
     it('devrait permettre de s\'abonner aux changements réseau', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
 
       const unsubscribe = syncService.onNetworkStatusChange(callback);
 
@@ -300,7 +301,7 @@ describe('SyncService', () => {
 
   describe('onSyncStatusChange', () => {
     it('devrait permettre de s\'abonner aux changements de sync', () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
 
       const unsubscribe = syncService.onSyncStatusChange(callback);
 
@@ -310,7 +311,7 @@ describe('SyncService', () => {
     });
 
     it('devrait notifier les changements de statut', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
 
       syncService.onSyncStatusChange(callback);
       await syncService.queueDPECreate('dpe-123', mockDPEDocument);

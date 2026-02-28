@@ -1,9 +1,10 @@
+import '../mocks/supabase.mock'
 /**
  * Tests unitaires pour les utilitaires XML
  * Couverture: xml-parser et xml-generator
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { XMLGenerator, generateXML, generateXMLWithValidation } from '../../utils/xml-generator';
 import { DPEXMLParser, parseDPEXML, parseDPEXMLStrict, parseDPEXMLWithDefaults } from '../../utils/xml-parser';
 import { XMLValidator, validateXML } from '../../utils/xml-validator';
