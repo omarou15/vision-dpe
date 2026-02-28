@@ -1,4 +1,4 @@
-export { supabase } from "./supabase";
+export { supabase, isSupabaseConfigured } from "./supabase";
 export * as authService from "./auth";
 export * as syncService from "./sync";
 export * as projetService from "./projet";

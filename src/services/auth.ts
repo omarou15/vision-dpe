@@ -96,9 +96,13 @@ export async function getCurrentUser() {
 export function onAuthStateChange(
   callback: (event: string, userId: string | null) => void
 ) {
+  if (!supabase) {
+    console.warn("Supabase non configuré — auth désactivée");
+    return { subscription: { unsubscribe: () => {} } };
+  }
   const {
     data: { subscription },
-  } = supabase.auth.onAuthStateChange((event, session) => {
+  } = supabase.auth.onAuthStateChange((event: string, session: any) => {
     callback(event, session?.user?.id ?? null);
   });
 
